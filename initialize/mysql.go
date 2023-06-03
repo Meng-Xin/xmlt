@@ -36,6 +36,8 @@ func InitDatabase(makeDSN string, onlineDSN string) {
 	sqlDB.SetMaxIdleConns(20)  //设置连接池，空闲
 	sqlDB.SetMaxOpenConns(100) //打开
 	sqlDB.SetConnMaxLifetime(time.Second * 30)
+	// 制作库开启 慢查询日志 Callback
+	SlowQueryLog(dbMake)
 
 	dbOnline, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       onlineDSN, // DSN data source name
@@ -72,4 +74,30 @@ func Migration(db *gorm.DB) {
 	//自动迁移模
 	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate()
 	log.Info("register table success")
+}
+
+// SlowQueryLog 慢查询日志
+func SlowQueryLog(db *gorm.DB) {
+	err := db.Callback().Query().Before("*").Register("slow_query_start", func(d *gorm.DB) {
+		now := time.Now()
+		d.Set("start_time", now)
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Callback().Query().After("*").Register("slow_query_end", func(d *gorm.DB) {
+		now := time.Now()
+		start, ok := d.Get("start_time")
+		if ok {
+			duration := now.Sub(start.(time.Time))
+			// 一般认为 10 Ms 为Sql慢查询
+			if duration > time.Millisecond*10 {
+				log.Debug("慢查询 %s", d.Statement.SQL.String())
+			}
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
 }
