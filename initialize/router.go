@@ -14,10 +14,10 @@ func NewRouter() *gin.Engine {
 
 	allRouter := router.RouterGroupAll
 
-	// 全局日志中间件
-	r.Use(middle.LoggerToFile())
 	// 全局限流
 	r.Use(middle.NewRateLimiterMiddleware(global.Redis, "general", 200, 60*time.Second))
+	// 全局日志中间件
+	r.Use(middle.LoggerToFile())
 
 	var publicGroup, privateGroup, v1 *gin.RouterGroup
 	// 公共路由组
