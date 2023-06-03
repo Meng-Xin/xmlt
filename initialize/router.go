@@ -1,15 +1,18 @@
-package router
+package initialize
 
 import (
 	"github.com/gin-gonic/gin"
 	"time"
 	"xmlt/global"
 	"xmlt/internal/api"
+	"xmlt/internal/router"
 	"xmlt/middle"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.Default()
+
+	allRouter := router.RouterGroupAll
 
 	// 全局日志中间件
 	r.Use(middle.LoggerToFile())
@@ -33,10 +36,14 @@ func NewRouter() *gin.Engine {
 	// V1管理
 	v1 = r.Group("/api/v1")
 	{
-		v1.GET("/user/register")
-		v1.POST("/user/register")
-		v1.GET("/user/login")
-		v1.POST("/user/login")
+		// User
+		//v1.GET("/user/register")
+		//v1.POST("/user/register")
+		//v1.GET("/user/login")
+		//v1.POST("/user/login")
+
+		// Article
+		allRouter.ArticleRouter.InitApiRouter(v1)
 	}
 
 	return r
