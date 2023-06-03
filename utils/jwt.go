@@ -18,7 +18,7 @@ var (
 )
 
 type PayLoad struct {
-	UserID   int64  `json:"user_id"`
+	UserID   uint64 `json:"user_id"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
@@ -32,7 +32,7 @@ func keyFunc(token *jwt.Token) (any, error) {
 }
 
 // GenToken 颁发token access token 和 refresh token
-func GenToken(userID int64, userName string) (atoken, rtoken string, err error) {
+func GenToken(userID uint64, userName string) (atoken, rtoken string, err error) {
 	// 构建 凭证 基础信息
 	rc := jwt.RegisteredClaims{
 		Issuer:    TokenIssuer,                       // 颁发人
