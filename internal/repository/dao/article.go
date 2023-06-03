@@ -2,20 +2,21 @@ package dao
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"gorm.io/gorm"
-	"xmlt/internal/domain"
+	"time"
+	"xmlt/global"
+	"xmlt/internal/model"
+	"xmlt/utils"
 )
 
 type ArticleDAO interface {
-	// Create 创建一篇文章
-	Create(ctx context.Context, article domain.Article) (uint64, error)
-	CreateAndCached(ctx context.Context, article domain.Article) (uint64, error)
-	// Update 更新一篇文章
-	Update(ctx context.Context, article domain.Article) error
-	// Get 方法应该负责将 Author 也一并组装起来。
-	// 这里就会有一个很重要的概念，叫做延迟加载，但是 GO 是做不了的，
-	// 所以只能考虑传递标记位，或者使用新方法来控制要不要把 Author 组装起来
-	Get(ctx context.Context, id uint64) (domain.Article, error)
+	// Insert 的概念更加贴近关系型数据库，所以这里就不再是用 CREATE 这种说法了
+	Insert(ctx context.Context, article model.Article) (uint64, error)
+	Update(ctx context.Context, article model.Article) error
+	GetByID(ctx context.Context, id uint64) (model.Article, error)
 }
 
 func NewArticleDAO(db *gorm.DB) ArticleDAO {
@@ -26,22 +27,40 @@ type articleGORM struct {
 	db *gorm.DB
 }
 
-func (a articleGORM) Create(ctx context.Context, article domain.Article) (uint64, error) {
-	//TODO implement me
-	panic("implement me")
+func (a *articleGORM) Insert(ctx context.Context, article model.Article) (uint64, error) {
+	err := a.db.WithContext(ctx).Create(&article).Error
+	return article.ID, err
 }
 
-func (a articleGORM) CreateAndCached(ctx context.Context, article domain.Article) (uint64, error) {
-	//TODO implement me
-	panic("implement me")
+func (a *articleGORM) Update(ctx context.Context, article model.Article) error {
+	article.Utime = utils.GetTimeMilli()
+	return a.db.WithContext(ctx).Model(&article).Updates(article).Error
 }
 
-func (a articleGORM) Update(ctx context.Context, article domain.Article) error {
-	//TODO implement me
-	panic("implement me")
+func (a *articleGORM) GetByID(ctx context.Context, id uint64) (model.Article, error) {
+	var art model.Article
+	err := a.db.WithContext(ctx).Where("id=?", id).First(&art).Error
+	return art, err
 }
 
-func (a articleGORM) Get(ctx context.Context, id uint64) (domain.Article, error) {
-	//TODO implement me
-	panic("implement me")
+// AfterCreate 延时创建文章
+func AfterCreate(db *gorm.DB) error {
+	// 该端函数存在问题
+	if db.Error != nil {
+		return db.Error
+	}
+	//client, ok := db.Get("redis_client")
+	client := global.Redis
+	if client != nil {
+		var article model.Article
+		data, err := json.Marshal(&article)
+		if err != nil {
+			return err
+		}
+		result, err := client.Set(fmt.Sprintf("article_db_%d", article.ID), string(data), time.Hour).Result()
+		if result != "OK" {
+			return errors.New("插入失败")
+		}
+	}
+	return nil
 }
