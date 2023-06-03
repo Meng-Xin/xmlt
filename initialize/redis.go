@@ -17,5 +17,4 @@ func InitRedis() {
 		panic(err)
 	}
 	global.Redis = client
-
 }
