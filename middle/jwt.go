@@ -26,6 +26,13 @@ func VerifyJWTMiddleware() gin.HandlerFunc {
 			c.JSON(http.StatusOK, public.Response{Status: code, Msg: e.GetMsg(code)})
 			c.Abort()
 		}
+		// 解析获取用户载荷信息
+		payLoad, err := utils.VerifyToken(tokens[0])
+		if err != nil {
+			return
+		}
+		c.Set("uid", payLoad.ID)
+		c.Set("username", payLoad.Username)
 		// 这里是否要通知客户端重新保存新的Token
 		c.Next()
 		// 下面封装可以通知客户端更新双Token
