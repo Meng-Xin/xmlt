@@ -4,7 +4,7 @@ server:
   openProxy: true
 logSet:
   logFilePath: "./config/log/"
-  logFileName: "log.log"
+  logFileName: "log.txt"
   saveMaxURI: 1024
 mysqlMake:
   username: "root"
