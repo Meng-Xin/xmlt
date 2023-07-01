@@ -5,4 +5,4 @@ type RouteGroup struct {
 	UserRouter
 }
 
-var RouterGroupAll = new(RouteGroup)
+var RouterGroupCtrl = new(RouteGroup)
