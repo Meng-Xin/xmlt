@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
-	"xmlt/global"
 )
 
 type ILog interface {
@@ -43,14 +42,13 @@ func (l *LogEmailHook) Fire(entry *logrus.Entry) error {
 	// 发送邮件
 	err := SendMail(mailTo, subject, msg)
 	if err != nil {
-		global.Log.Error(err.Error())
 		return err
 	}
 	return nil
 }
 
 func NewLLogger() ILog {
-	logFile := "./config/log/abnormal.txt"
+	logFile := "./config/log/systemLog.txt"
 	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Println("Failed to create logfile " + logFile)
