@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
+	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
 	"xmlt/internal/expand/public"
@@ -63,7 +63,7 @@ func (a *ArticleController) Save(ctx *gin.Context) {
 	if err != nil {
 		// 这边不能把 error 写回去
 		// 暂时我直接输出到控制台
-		log.Error(err)
+		global.Log.Error(err)
 		ctx.String(http.StatusInternalServerError, "系统异常，请重试")
 		return
 	}
