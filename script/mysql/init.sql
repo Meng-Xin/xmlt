@@ -1,3 +1,3 @@
-create database if not exists `xiaohongshu_b`;
-create database if not exists `xiaohongshu_c`;
+create database if not exists `xmlt_make`;
+create database if not exists `xmlt_online`;
 create database if not exists `integration_tests`;
