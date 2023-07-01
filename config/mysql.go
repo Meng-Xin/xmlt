@@ -3,7 +3,7 @@ package config
 type Mysql struct {
 	Username     string `json:"username" yaml:"username"`             // 数据库用户名
 	Password     string `json:"password" yaml:"password"`             // 数据库密码
-	Dbname       string `json:"db-name" yaml:"db-name"`               // 数据库名
+	Dbname       string `json:"dbName" yaml:"dbName"`                 // 数据库名
 	Path         string `json:"path" yaml:"path"`                     // 服务器地址:端口
 	Port         string `json:"port" yaml:"port"`                     //:端口
 	AutoMigrate  bool   `json:"auto_migrate" yaml:"autoMigrate"`      // 是否开启表迁移

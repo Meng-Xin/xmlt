@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm/schema"
 	"time"
 	"xmlt/global"
+	"xmlt/internal/model"
 )
 
 func InitDatabase(makeDSN string, onlineDSN string) {
@@ -72,7 +73,9 @@ func InitDatabase(makeDSN string, onlineDSN string) {
 // Migration 执行数据迁移
 func Migration(db *gorm.DB) {
 	//自动迁移模
-	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate()
+	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(
+		model.User{},
+	)
 	log.Info("register table success")
 }
 
