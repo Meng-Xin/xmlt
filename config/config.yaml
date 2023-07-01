@@ -9,14 +9,14 @@ logSet:
 mysqlMake:
   username: "root"
   password: "root"
-  db-name: "xmlt_make"
+  dbName: "xmlt_make"
   path: "127.0.0.1"
   port: "3306"
-  autoMigrate: false
+  autoMigrate: true
 mysqlOnline:
   username: "root"
   password: "root"
-  db-name: "xmlt_online"
+  dbName: "xmlt_online"
   path: "127.0.0.1"
   port: "3306"
   autoMigrate: false
