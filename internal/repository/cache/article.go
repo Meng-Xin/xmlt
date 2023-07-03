@@ -3,11 +3,11 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
 	"time"
 	"xmlt/internal/domain"
+	"xmlt/internal/expand/e"
 )
 
 type ArticleCache interface {
@@ -35,7 +35,7 @@ func (a *articleRedisCache) Set(ctx context.Context, article domain.Article) err
 	}
 	res, err := a.client.Set(fmt.Sprintf("article_%d", article.ID), string(data), time.Hour).Result()
 	if res != "OK" {
-		return errors.New("Reids - 插入失败")
+		return e.RedisInsertError
 	}
 	return err
 }
