@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"time"
 	"xmlt/global"
 	"xmlt/internal/api"
@@ -12,7 +13,7 @@ import (
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 
-	allRouter := router.RouterGroupAll
+	allRouter := router.RouterGroupCtrl
 
 	// 全局限流
 	r.Use(middle.NewRateLimiterMiddleware(global.Redis, "general", 200, 60*time.Second))
@@ -29,7 +30,9 @@ func NewRouter() *gin.Engine {
 	privateGroup = r.Group("admin")
 	privateGroup.Use(middle.VerifyJWTMiddleware())
 	{
-		privateGroup.GET("/login")
+		privateGroup.GET("/login", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, "JWT 校验通过！")
+		})
 	}
 	// Swagger
 
@@ -44,6 +47,7 @@ func NewRouter() *gin.Engine {
 
 		// Article
 		allRouter.ArticleRouter.InitApiRouter(v1)
+		allRouter.UserRouter.InitApiRouter(v1)
 	}
 
 	return r
