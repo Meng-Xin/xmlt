@@ -1,6 +1,9 @@
 package utils
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
 // GetTimeSecond 获取秒
 func GetTimeSecond() int {
@@ -15,4 +18,10 @@ func GetTimeMilli() int64 {
 // GetTimeNano 获取纳秒
 func GetTimeNano() int {
 	return time.Now().Nanosecond()
+}
+
+// GetRandTime 获取指定范围时间
+// base 基础时间值 append 追加时间 max 随机偏移值
+func GetRandTime(baseTime, appendUnit time.Duration, max int) time.Duration {
+	return baseTime + (appendUnit * time.Duration(rand.Intn(max)))
 }
