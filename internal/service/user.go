@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
 	"xmlt/internal/repository"
@@ -99,18 +98,18 @@ func (u *userService) Get(ctx context.Context, id uint64) (domain.User, error) {
 }
 
 func (u *userService) CheckNickName(ctx context.Context, nickName string) bool {
-	user, err := u.repo.GetByNickName(ctx, nickName)
+	user, _ := u.repo.GetByNickName(ctx, nickName)
 	if user.ID != 0 {
 		return false
 	}
-	global.Log.Info("空查询测试：" + err.Error())
+	//global.Log.Info("空查询测试：" + err.Error())
 	return true
 }
 func (u *userService) CheckUserName(ctx context.Context, userName string) bool {
-	user, err := u.repo.GetByUserName(ctx, userName)
+	user, _ := u.repo.GetByUserName(ctx, userName)
 	if user.ID != 0 {
 		return false
 	}
-	global.Log.Info("空查询测试：" + err.Error())
+	//global.Log.Info("空查询测试：" + err.Error())
 	return true
 }
