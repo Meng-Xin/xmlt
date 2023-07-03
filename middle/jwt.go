@@ -17,6 +17,7 @@ func VerifyJWTMiddleware() gin.HandlerFunc {
 			code = e.NotFindToken
 			c.JSON(http.StatusOK, public.Response{Status: code, Msg: e.GetMsg(code)})
 			c.Abort()
+			return
 		}
 		// 拿到并切分token
 		tokens := strings.Split(author, ",")
