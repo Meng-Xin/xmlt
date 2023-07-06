@@ -75,6 +75,12 @@ func Migration(db *gorm.DB) {
 	//自动迁移模
 	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(
 		model.User{},
+		model.Article{},
+		model.Tag{},
+		model.Category{},
+		model.Comment{},
+		model.Notification{},
+		model.Thumbs{},
 	)
 	log.Info("register table success")
 }
@@ -96,7 +102,7 @@ func SlowQueryLog(db *gorm.DB) {
 			duration := now.Sub(start.(time.Time))
 			// 一般认为 10 Ms 为Sql慢查询
 			if duration > time.Millisecond*10 {
-				log.Debug("慢查询 %s", d.Statement.SQL.String())
+				global.Log.Error("慢查询 %s", d.Statement.SQL.String())
 			}
 		}
 	})
