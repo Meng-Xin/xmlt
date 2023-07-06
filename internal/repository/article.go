@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	log "github.com/sirupsen/logrus"
+	"time"
 	"xmlt/internal/domain"
 	"xmlt/internal/model"
 	"xmlt/internal/repository/cache"
@@ -34,12 +35,18 @@ type articleRepo struct {
 func (a *articleRepo) Create(ctx context.Context, article domain.Article) (uint64, error) {
 	now := utils.GetTimeMilli()
 	entity := model.Article{
-		ID:      article.ID,
-		Title:   article.Title,
-		Content: article.Content,
-		Author:  article.Author.ID,
-		Ctime:   now,
-		Utime:   now,
+		ID:           article.ID,
+		Title:        article.Title,
+		Content:      article.Content,
+		CommentCount: article.CommentCount,
+		Status:       article.Status,
+		Author:       article.Author,
+		CategoryID:   article.CategoryID,
+		NiceTopic:    article.NiceTopic,
+		BrowseCount:  article.BrowseCount,
+		ThumbsUP:     article.ThumbsUP,
+		Ctime:        now,
+		Utime:        now,
 	}
 	return a.dao.Insert(ctx, entity)
 }
@@ -47,12 +54,18 @@ func (a *articleRepo) Create(ctx context.Context, article domain.Article) (uint6
 func (a *articleRepo) CreateAndCached(ctx context.Context, article domain.Article) (uint64, error) {
 	now := utils.GetTimeMilli()
 	entity := model.Article{
-		ID:      article.ID,
-		Title:   article.Title,
-		Content: article.Content,
-		Author:  article.Author.ID,
-		Ctime:   now,
-		Utime:   now,
+		ID:           article.ID,
+		Title:        article.Title,
+		Content:      article.Content,
+		CommentCount: article.CommentCount,
+		Status:       article.Status,
+		Author:       article.Author,
+		CategoryID:   article.CategoryID,
+		NiceTopic:    article.NiceTopic,
+		BrowseCount:  article.BrowseCount,
+		ThumbsUP:     article.ThumbsUP,
+		Ctime:        now,
+		Utime:        now,
 	}
 	// 也可以再次封装error
 	id, err := a.dao.Insert(ctx, entity)
@@ -67,12 +80,17 @@ func (a *articleRepo) CreateAndCached(ctx context.Context, article domain.Articl
 func (a *articleRepo) Update(ctx context.Context, article domain.Article) error {
 	now := utils.GetTimeMilli()
 	entity := model.Article{
-		ID:      article.ID,
-		Title:   article.Title,
-		Content: article.Content,
-		Author:  article.Author.ID,
-		Ctime:   now,
-		Utime:   now,
+		ID:           article.ID,
+		Title:        article.Title,
+		Content:      article.Content,
+		CommentCount: article.CommentCount,
+		Status:       article.Status,
+		Author:       article.Author,
+		CategoryID:   article.CategoryID,
+		NiceTopic:    article.NiceTopic,
+		BrowseCount:  article.BrowseCount,
+		ThumbsUP:     article.ThumbsUP,
+		Utime:        now,
 	}
 	return a.dao.Update(ctx, entity)
 }
@@ -90,12 +108,18 @@ func (a *articleRepo) Get(ctx context.Context, id uint64) (domain.Article, error
 	}
 	// 按道理来说这里需要提前组装好 Author的
 	art := domain.Article{
-		ID:      entity.ID,
-		Title:   entity.Title,
-		Content: entity.Content,
-		Author: domain.Author{
-			ID: entity.Author,
-		},
+		ID:           entity.ID,
+		Title:        entity.Title,
+		Content:      entity.Content,
+		CommentCount: entity.CommentCount,
+		Status:       entity.Status,
+		Author:       entity.Author,
+		CategoryID:   entity.CategoryID,
+		NiceTopic:    entity.NiceTopic,
+		BrowseCount:  entity.BrowseCount,
+		ThumbsUP:     entity.ThumbsUP,
+		Ctime:        time.UnixMilli(entity.Ctime),
+		Utime:        time.UnixMilli(entity.Utime),
 	}
 	err = a.cache.Set(ctx, art)
 	if err != nil {
