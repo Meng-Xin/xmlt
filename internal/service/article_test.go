@@ -20,18 +20,18 @@ func TestService_Save(t *testing.T) {
 	}{
 		{
 			name: "创建",
-			inputArt: domain.Article{Author: domain.Author{ID: 123},
+			inputArt: domain.Article{Author: 123,
 				Title: "这是标题", Content: "这是内容"},
 			mock: func(ctrl *gomock.Controller) repository.ArticleRepo {
 				repo := repository.NewMockArticleRepo(ctrl)
 				repo.EXPECT().
-					Create(gomock.Any(), domain.Article{Author: domain.Author{ID: 123},
+					Create(gomock.Any(), domain.Article{Author: 123,
 						Title: "这是标题", Content: "这是内容"}).
 					Return(uint64(1), nil)
 				return repo
 			},
 			wantArt: domain.Article{ID: 1, Title: "这是标题", Content: "这是内容",
-				Author: domain.Author{ID: 123}},
+				Author: 123},
 		},
 		// 你可以在这里试试写一下更新的测试用例
 		//{
