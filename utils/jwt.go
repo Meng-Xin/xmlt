@@ -52,17 +52,18 @@ func GenToken(userID uint64, userName string) (atoken, rtoken string, err error)
 }
 
 // VerifyToken 验证Token
-func VerifyToken(tokenId string) (pl *PayLoad, err error) {
-	token, err := jwt.ParseWithClaims(tokenId, pl, keyFunc)
+func VerifyToken(tokenId string) (PayLoad, error) {
+	var payLoad PayLoad
+	token, err := jwt.ParseWithClaims(tokenId, &payLoad, keyFunc)
 	if err != nil {
-		return pl, err
+		return payLoad, err
 	}
 	// 解析成功后为True
 	if !token.Valid {
 		err = ErrorInvalidToken
-		return nil, err
+		return payLoad, err
 	}
-	return pl, nil
+	return payLoad, nil
 }
 
 // RefreshToken 通过refresh token 刷新 短token(atoken)
@@ -75,7 +76,7 @@ func RefreshToken(atoken, rtoken string) (newAtoken, newRtoken string, err error
 	var claim PayLoad
 	// 校验不通过，并且该错误是因为Token过期引起的，那么进行续签。
 	_, err = jwt.ParseWithClaims(atoken, &claim, keyFunc)
-	if err == jwt.ErrTokenExpired {
+	if err != nil && err.Error() == "token has invalid claims: token is expired" {
 		return GenToken(claim.UserID, claim.Username)
 	}
 	return
