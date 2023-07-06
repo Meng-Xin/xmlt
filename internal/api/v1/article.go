@@ -36,7 +36,7 @@ func (a *ArticleController) GetByID(ctx *gin.Context) {
 		// TODO 如果代码严谨的话，这边要区别是真的没有数据，还是服务器出现了异常
 		return
 	}
-	var vo ArticleVO
+	var vo ArticleSave
 	vo.init(art)
 	ctx.JSON(http.StatusOK, public.Response{
 		Status: code,
@@ -46,19 +46,20 @@ func (a *ArticleController) GetByID(ctx *gin.Context) {
 
 // Save 作者可以保存文章
 func (a *ArticleController) Save(ctx *gin.Context) {
-	var vo ArticleVO
-	if err := ctx.Bind(&vo); err != nil {
+	code := e.SUCCESS
+	var data ArticleSave
+	if err := ctx.Bind(&data); err != nil {
 		// 出现 error 的情况下，实际上前端已经返回了
+		global.Log.Warn("解析Article Save 结构体错误：", err.Error())
 		return
 	}
-	// 缺乏登录部分，所以直接写死
-	var authorID uint64 = 123
+	// 从 jwtmiddler 中拿到解析的UID
+	authorID := uint64(ctx.GetInt64("uid"))
 	_, err := a.service.Save(ctx.Request.Context(), domain.Article{
-		Title:   vo.Title,
-		Content: vo.Content,
-		Author: domain.Author{
-			ID: authorID,
-		},
+		Title:      data.Title,
+		Content:    data.Content,
+		CategoryID: data.CategoryID,
+		Author:     authorID,
 	})
 	if err != nil {
 		// 这边不能把 error 写回去
@@ -67,13 +68,52 @@ func (a *ArticleController) Save(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "系统异常，请重试")
 		return
 	}
-	ctx.Redirect(http.StatusTemporaryRedirect, "/article/new/success")
+	ctx.JSON(http.StatusOK, public.Response{
+		Status: code,
+		Msg:    "保存成功！",
+	})
 }
 
-type ArticleVO struct {
-	ID      uint64 `form:"id" json:"id"`
-	Title   string `form:"title" json:"title" binding:"required"`
-	Content string `form:"content" json:"content" binding:"required"`
+func (a *ArticleController) Publish(ctx *gin.Context) {
+	code := e.SUCCESS
+
+	var data ArticleSave
+	err := ctx.Bind(&data)
+	if err != nil {
+		global.Log.Warn("解析Article Save 结构体错误：", err.Error())
+		return
+	}
+	// CheckPushPermission 检查权限
+	authorID := uint64(ctx.GetInt64("uid"))
+	err = a.service.Publish(ctx, domain.Article{
+		ID:         data.ID,
+		Title:      data.Title,
+		Content:    data.Content,
+		CategoryID: data.CategoryID,
+		Author:     authorID,
+	})
+	if err != nil {
+		if err == e.UpdateArticleIdenticalError {
+			global.Log.Warn("非法修改文章作者身份,记录IP：", ctx.Request.Host)
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, public.Response{
+		Status: code,
+		Msg:    "发布成功，审核中……",
+	})
+}
+
+type ArticleSave struct {
+	ID          uint64 `form:"id" json:"id"`
+	Title       string `form:"title" json:"title" binding:"required"`           // 帖子标题
+	Content     string `form:"content" json:"content" binding:"required"`       // 帖子内容
+	Status      uint8  `form:"status" json:"status"`                            // 帖子状态
+	CategoryID  uint16 `json:"categoryID" form:"categoryID" binding:"required"` // 所属板块
+	NiceTopic   uint8  `json:"niceTopic" from:"niceTopic"`                      // 精选话题
+	BrowseCount uint64 `json:"browseCount" from:"browseCount"`                  // 浏览量
+	ThumbsUP    uint32 `json:"thumbsUP" form:"thumbsUP"`                        // 点赞数
+	Author      uint64 // 作者
 	// 一般来说，考虑到各种 APP 发版本不容易，
 	// 所以数字、货币、日期、国际化之类的都是后端做的
 	// 前端就是无脑展示
@@ -81,10 +121,16 @@ type ArticleVO struct {
 	Utime string
 }
 
-func (a *ArticleVO) init(art domain.Article) {
+func (a *ArticleSave) init(art domain.Article) {
 	a.ID = art.ID
+	a.Title = art.Title
+	a.Content = art.Content
+	a.Status = art.Status
+	a.CategoryID = art.CategoryID
+	a.NiceTopic = art.NiceTopic
+	a.BrowseCount = art.BrowseCount
+	a.ThumbsUP = art.ThumbsUP
+	a.Author = art.Author
 	a.Ctime = art.Ctime.String()
 	a.Utime = art.Utime.String()
-	a.Content = art.Content
-	a.Title = art.Title
 }
