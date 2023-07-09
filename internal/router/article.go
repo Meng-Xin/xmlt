@@ -28,9 +28,13 @@ func (a *ArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	{
 		publicRouter.GET("/read/:id", articleCtl.GetByID)
 		articleRouter.GET("/new", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, "新建文章")
+			ctx.JSON(http.StatusOK, "前端路由：新建文章")
+		})
+		articleRouter.GET("/update", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, "前端路由：修改文章")
 		})
 		articleRouter.POST("/new", articleCtl.Save)
 		articleRouter.POST("/publish", articleCtl.Publish)
+
 	}
 }
