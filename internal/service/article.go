@@ -10,7 +10,7 @@ import (
 type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (uint64, error)
 	Publish(ctx context.Context, article domain.Article) error
-	Get(ctx context.Context, id uint64) (domain.Article, error)
+	Get(ctx context.Context, id uint64, source int) (domain.Article, error)
 }
 
 type articleService struct {
@@ -62,7 +62,10 @@ func (a *articleService) Publish(ctx context.Context, article domain.Article) er
 	return err
 }
 
-// Get 这是 C 端查看
-func (a *articleService) Get(ctx context.Context, id uint64) (domain.Article, error) {
+// Get Source：0-线上库 1-制作库
+func (a *articleService) Get(ctx context.Context, id uint64, source int) (domain.Article, error) {
+	if source == 0 {
+		return a.bRepo.Get(ctx, id)
+	}
 	return a.cRepo.Get(ctx, id)
 }
