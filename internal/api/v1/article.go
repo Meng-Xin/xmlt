@@ -7,6 +7,7 @@ import (
 	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
+	"xmlt/internal/expand/enum"
 	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
 )
@@ -31,7 +32,7 @@ func (a *ArticleController) GetByID(ctx *gin.Context) {
 		})
 		return
 	}
-	art, err := a.service.Get(ctx.Request.Context(), id)
+	art, err := a.service.Get(ctx.Request.Context(), id, enum.ArticleGetSourceOnline)
 	if err != nil {
 		// TODO 如果代码严谨的话，这边要区别是真的没有数据，还是服务器出现了异常
 		return
