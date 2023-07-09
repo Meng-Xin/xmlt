@@ -45,7 +45,7 @@ func TestArticleController_GetByID(t *testing.T) {
 			},
 			wantResp: public.Response{
 				Status: 200,
-				Data: v1.ArticleVO{
+				Data: v1.ArticleSave{
 					ID:      1,
 					Title:   "这是标题",
 					Content: "这是内容",
