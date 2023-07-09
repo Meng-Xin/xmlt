@@ -12,6 +12,7 @@ import (
 	"time"
 	"xmlt/internal/api/v1"
 	"xmlt/internal/domain"
+	"xmlt/internal/expand/enum"
 	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
 )
@@ -34,7 +35,7 @@ func TestArticleController_GetByID(t *testing.T) {
 			}(),
 			mock: func(ctrl *gomock.Controller) service.ArticleService {
 				ms := service.NewMockArticleService(ctrl)
-				ms.EXPECT().Get(gomock.Any(), uint64(1)).Return(domain.Article{
+				ms.EXPECT().Get(gomock.Any(), uint64(1), enum.ArticleGetSourceOnline).Return(domain.Article{
 					ID:      1,
 					Title:   "这是标题",
 					Content: "这是内容",
