@@ -59,8 +59,9 @@ func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 			}
 			// 写入缓存
 			err = c.cache.Set(ctx, domain.Comment(endData))
+			err = c.cache.ZAdd(ctx, domain.Comment(endData))
 			if err != nil {
-				return err
+				global.Log.Warn(err.Error())
 			}
 		}
 		return err

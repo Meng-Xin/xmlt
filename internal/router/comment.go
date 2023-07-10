@@ -26,8 +26,8 @@ func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	commentService := service.NewCommentService(commentRepo)
 
 	// 挂载 RabbitMQ 对创建评论的处理
-
 	err := commentRepo.ConsumerMQ(context.Background())
+
 	if err != nil {
 		log.Error(err.Error())
 	}
