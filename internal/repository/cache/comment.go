@@ -32,7 +32,7 @@ func (c *commentRedisCache) ZAdd(ctx context.Context, comments ...domain.Comment
 			return err
 		}
 		// 使用 ZSet 存储 某篇文章 的评论
-		_, err = c.client.WithContext(ctx).ZAdd(fmt.Sprintf("article_comments_%d", comment.ID), redis.Z{
+		_, err = c.client.WithContext(ctx).ZAdd(fmt.Sprintf("article_comments_%d", comment.ArticleID), redis.Z{
 			Score:  float64(comment.Floor),
 			Member: data,
 		}).Result()
