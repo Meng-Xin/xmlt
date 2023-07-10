@@ -39,15 +39,12 @@ func NewRouter() *gin.Engine {
 	// V1管理
 	v1 = r.Group("/api/v1")
 	{
-		// User
-		//v1.GET("/user/register")
-		//v1.POST("/user/register")
-		//v1.GET("/user/login")
-		//v1.POST("/user/login")
-
-		// Article
+		// Article 帖子
 		allRouter.ArticleRouter.InitApiRouter(v1)
+		// User 用户
 		allRouter.UserRouter.InitApiRouter(v1)
+		// Comment 评论
+		allRouter.CommentRouter.InitApiRouter(v1)
 	}
 
 	return r
