@@ -13,4 +13,5 @@ var (
 	DB_ONLINE *gorm.DB          // 线上库 - 用户
 	Redis     *redis.Client     // RedisClient
 	Log       utils.ILog        // 异常日志系统
+	RabbitMQ  *utils.RabbitMQ
 )
