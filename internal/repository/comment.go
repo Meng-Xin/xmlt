@@ -37,7 +37,7 @@ type commentRepo struct {
 
 func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 	// 从消息队列获取
-	msgs, err := global.RabbitMQ.Ch.Consume(global.RabbitMQ.QueueName, "评论", false, false, false, false, nil)
+	msgs, err := global.RabbitMQ.Ch.Consume(global.RabbitMQ.QueueName, "评论消费", true, false, false, false, nil)
 	if err != nil {
 		return err
 	}
