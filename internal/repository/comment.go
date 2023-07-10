@@ -26,11 +26,46 @@ type CommentRepo interface {
 	GetByUserID(ctx context.Context, id uint64, paging domain.Paging) ([]domain.Comment, error)
 	// GetLatestFloor 获取最新楼层
 	GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error)
+	// ConsumerMQ
+	ConsumerMQ(ctx context.Context) error
 }
 
 type commentRepo struct {
 	dao   dao.CommentDao
 	cache cache.CommentCache
+}
+
+func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
+	// 从消息队列获取
+	msgs, err := global.RabbitMQ.Ch.Consume(global.RabbitMQ.QueueName, "评论", false, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+	go func() error {
+		for msg := range msgs {
+			endData := model.Comment{}
+			err = json.Unmarshal(msg.Body, &endData)
+			if err != nil {
+				return err
+			}
+			floor, err := c.GetLatestFloor(ctx, endData.ArticleID)
+			if err != nil {
+				return err
+			}
+			endData.Floor = floor + 1
+			_, err = c.dao.Insert(ctx, endData)
+			if err != nil {
+				return err
+			}
+			// 写入缓存
+			err = c.cache.Set(ctx, domain.Comment(endData))
+			if err != nil {
+				return err
+			}
+		}
+		return err
+	}()
+	return err
 }
 
 func (c *commentRepo) GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error) {
@@ -56,25 +91,25 @@ func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Commen
 	if err != nil {
 		return 0, err
 	}
-	// 从消息队列获取
-	queueData, err := global.RabbitMQ.SubscribeToQueue("评论消费")
-	if err != nil {
-		return 0, err
-	}
-	endData := model.Comment{}
-	err = json.Unmarshal(queueData, &endData)
-	if err != nil {
-		return 0, err
-	}
+	//// 从消息队列获取
+	//queueData, err := global.RabbitMQ.SubscribeToQueue("评论消费")
+	//if err != nil {
+	//	return 0, err
+	//}
+	//endData := model.Comment{}
+	//err = json.Unmarshal(queueData, &endData)
+	//if err != nil {
+	//	return 0, err
+	//}
+	//// 写入缓存
+	//id, err := c.dao.Insert(ctx, endData)
+	//if err != nil {
+	//	return 0, err
+	//}
+	//comment.ID = id
 	// 写入缓存
-	id, err := c.dao.Insert(ctx, endData)
-	if err != nil {
-		return 0, err
-	}
-	comment.ID = id
-	// 写入缓存
-	err = c.cache.Set(ctx, comment)
-	return id, err
+	//err = c.cache.Set(ctx, comment)
+	return comment.ID, err
 }
 
 func (c *commentRepo) Update(ctx context.Context, comment domain.Comment) error {

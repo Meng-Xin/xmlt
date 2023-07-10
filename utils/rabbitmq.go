@@ -6,34 +6,34 @@ import (
 )
 
 type RabbitMQ struct {
-	client     *amqp.Connection
-	ch         *amqp.Channel
-	queueName  string
-	exchange   string
-	routingKey string
+	Client     *amqp.Connection
+	Ch         *amqp.Channel
+	QueueName  string
+	Exchange   string
+	RoutingKey string
 }
 
 func NewRabbitMQ(queueName, exchange, routingKey, dsn string) *RabbitMQ {
 	rabbitmq := RabbitMQ{
-		queueName:  queueName,
-		exchange:   exchange,
-		routingKey: routingKey,
+		QueueName:  queueName,
+		Exchange:   exchange,
+		RoutingKey: routingKey,
 	}
 	var err error
 	//创建rabbitmq连接
-	rabbitmq.client, err = amqp.Dial(dsn)
+	rabbitmq.Client, err = amqp.Dial(dsn)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	//创建Channel
-	rabbitmq.ch, err = rabbitmq.client.Channel()
+	rabbitmq.Ch, err = rabbitmq.Client.Channel()
 	if err != nil {
 		panic(err.Error())
 	}
 
 	// 创建队列
-	_, err = rabbitmq.ch.QueueDeclare(queueName, false, false, false, true, nil)
+	_, err = rabbitmq.Ch.QueueDeclare(queueName, false, false, false, true, nil)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -41,14 +41,14 @@ func NewRabbitMQ(queueName, exchange, routingKey, dsn string) *RabbitMQ {
 }
 
 func (r *RabbitMQ) PublishOnQueue(ctx context.Context, msg []byte) error {
-	return r.ch.PublishWithContext(ctx, r.exchange, r.queueName, false, false, amqp.Publishing{
+	return r.Ch.PublishWithContext(ctx, r.Exchange, r.QueueName, false, false, amqp.Publishing{
 		ContentType: "application/json",
 		Body:        msg,
 	})
 }
 
 func (r *RabbitMQ) SubscribeToQueue(consumerName string) ([]byte, error) {
-	msgs, err := r.ch.Consume(r.queueName, consumerName, false, false, false, false, nil)
+	msgs, err := r.Ch.Consume(r.QueueName, consumerName, false, false, false, false, nil)
 	if err != nil {
 		return nil, err
 	}

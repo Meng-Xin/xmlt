@@ -1,7 +1,9 @@
 package router
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"xmlt/global"
 	v1 "xmlt/internal/api/v1"
 	"xmlt/internal/repository"
@@ -20,8 +22,15 @@ func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	// 依赖注入
 	commentCache := cache.NewCommentRedisCache(global.Redis)
 	commentDao := dao.NewCommentDao(global.DB_MAKE)
-	commentService := service.NewCommentService(repository.NewCommentRepo(commentDao, commentCache))
+	commentRepo := repository.NewCommentRepo(commentDao, commentCache)
+	commentService := service.NewCommentService(commentRepo)
 
+	// 挂载 RabbitMQ 对创建评论的处理
+
+	err := commentRepo.ConsumerMQ(context.Background())
+	if err != nil {
+		log.Error(err.Error())
+	}
 	commentCtrl := v1.NewCommentCtrl(commentService)
 	{
 		// 新增评论
