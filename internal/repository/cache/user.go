@@ -25,7 +25,7 @@ func (u *userRedisCache) Set(ctx context.Context, user domain.User) error {
 	if err != nil {
 		return err
 	}
-	res, err := u.client.Set(fmt.Sprintf("user_%d", user.ID), data, utils.GetRandTime(time.Hour, time.Minute, 30)).Result()
+	res, err := u.client.WithContext(ctx).Set(fmt.Sprintf("user_%d", user.ID), data, utils.GetRandTime(time.Hour, time.Minute, 30)).Result()
 	if res != "OK" {
 		return e.RedisInsertError
 	}
@@ -33,7 +33,7 @@ func (u *userRedisCache) Set(ctx context.Context, user domain.User) error {
 }
 
 func (u *userRedisCache) Get(ctx context.Context, uid uint64) (domain.User, error) {
-	data, err := u.client.Get(fmt.Sprintf("user_%d", uid)).Bytes()
+	data, err := u.client.WithContext(ctx).Get(fmt.Sprintf("user_%d", uid)).Bytes()
 	if err != nil {
 		return domain.User{}, err
 	}
