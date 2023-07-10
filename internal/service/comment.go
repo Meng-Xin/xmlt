@@ -11,7 +11,7 @@ import (
 
 type CommentService interface {
 	// AddComment 新增评论
-	AddComment(ctx context.Context, comment domain.Comment) (uint64, error)
+	AddComment(ctx context.Context, comment domain.Comment) error
 	// DeleteComment 删除评论 (修改评论状态)
 	DeleteComment(ctx context.Context, comment domain.Comment) error
 	// GetArtComment 获取帖子评论
@@ -26,13 +26,9 @@ type commentService struct {
 	repo repository.CommentRepo
 }
 
-func (c *commentService) AddComment(ctx context.Context, comment domain.Comment) (uint64, error) {
+func (c *commentService) AddComment(ctx context.Context, comment domain.Comment) error {
 	// 新增评论 TODO 待完善，需要走消息队保证楼层并发问题
-	cid, err := c.repo.CreateAndCached(ctx, comment)
-	if err != nil {
-		return 0, err
-	}
-	return cid, nil
+	return c.repo.CreateAndCached(ctx, comment)
 }
 
 func (c *commentService) DeleteComment(ctx context.Context, comment domain.Comment) error {

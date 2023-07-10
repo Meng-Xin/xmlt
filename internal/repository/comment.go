@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/enum"
@@ -15,7 +16,7 @@ import (
 
 type CommentRepo interface {
 	// CreateAndCached 创建评论,并写入缓存
-	CreateAndCached(ctx context.Context, comment domain.Comment) (uint64, error)
+	CreateAndCached(ctx context.Context, comment domain.Comment) error
 	// Update 更新评论状态 只能更新自己的评论状态
 	Update(ctx context.Context, comment domain.Comment) error
 	// Get 获取单条评论信息
@@ -49,7 +50,7 @@ func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 				return err
 			}
 			floor, err := c.GetLatestFloor(ctx, endData.ArticleID)
-			if err != nil {
+			if err != nil && err != gorm.ErrRecordNotFound {
 				return err
 			}
 			endData.Floor = floor + 1
@@ -73,7 +74,7 @@ func (c *commentRepo) GetLatestFloor(ctx context.Context, articleID uint64) (uin
 	return c.dao.GetLatestFloorByArticleID(ctx, articleID)
 }
 
-func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Comment) (uint64, error) {
+func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Comment) error {
 	comment.Ctime = utils.GetTimeMilli()
 	entity := model.Comment{
 		Content:   comment.Content,
@@ -86,31 +87,14 @@ func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Commen
 	// 存入消息队列
 	data, err := json.Marshal(entity)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	err = global.RabbitMQ.PublishOnQueue(ctx, data)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	//// 从消息队列获取
-	//queueData, err := global.RabbitMQ.SubscribeToQueue("评论消费")
-	//if err != nil {
-	//	return 0, err
-	//}
-	//endData := model.Comment{}
-	//err = json.Unmarshal(queueData, &endData)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//// 写入缓存
-	//id, err := c.dao.Insert(ctx, endData)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//comment.ID = id
-	// 写入缓存
-	//err = c.cache.Set(ctx, comment)
-	return comment.ID, err
+
+	return err
 }
 
 func (c *commentRepo) Update(ctx context.Context, comment domain.Comment) error {

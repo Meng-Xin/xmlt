@@ -28,7 +28,7 @@ func (c *CommentController) Create(ctx *gin.Context) {
 	}
 	uid := uint64(ctx.GetInt64("uid"))
 	// 新增评论
-	id, err := c.service.AddComment(ctx, domain.Comment{
+	err = c.service.AddComment(ctx, domain.Comment{
 		Content:   com.Content,
 		UserID:    uid,
 		ArticleID: com.ArticleID,
@@ -40,7 +40,6 @@ func (c *CommentController) Create(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, public.Response{
 		Status: code,
-		Data:   id,
 		Msg:    "新增评论成功",
 	})
 }
