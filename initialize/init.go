@@ -15,4 +15,6 @@ func GlobalInit() {
 	InitDatabase(global.Config.MysqlMake.Dsn(), global.Config.MysqlOnline.Dsn())
 	// cache 初始化
 	InitRedis()
+	// RabbitMQ初始化
+	global.RabbitMQ = utils.NewRabbitMQ("comment", "", "", "amqp://guest:guest@localhost:5672/")
 }
