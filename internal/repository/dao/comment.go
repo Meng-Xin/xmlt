@@ -20,10 +20,18 @@ type CommentDao interface {
 	GetByArticleID(ctx context.Context, articleID uint64, paging domain.Paging) ([]model.Comment, error)
 	// GetByUserID 根据 用户ID 获取评论
 	GetByUserID(ctx context.Context, userID uint64, paging domain.Paging) ([]model.Comment, error)
+	// GetLatestFloorByArticleID 根据 文章ID 获取评论最新楼层
+	GetLatestFloorByArticleID(ctx context.Context, articleID uint64) (uint32, error)
 }
 
 type commentGORM struct {
 	db *gorm.DB
+}
+
+func (c *commentGORM) GetLatestFloorByArticleID(ctx context.Context, articleID uint64) (uint32, error) {
+	var comment model.Comment
+	err := c.db.WithContext(ctx).Where("article_id=?", articleID).Last(&comment).Error
+	return comment.Floor, err
 }
 
 func (c *commentGORM) Insert(ctx context.Context, comment model.Comment) (uint64, error) {

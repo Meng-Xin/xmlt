@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
 	"xmlt/internal/expand/enum"
@@ -27,6 +28,13 @@ type commentService struct {
 }
 
 func (c *commentService) AddComment(ctx context.Context, comment domain.Comment) (uint64, error) {
+	// 拿到最新楼层
+	floor, err := c.repo.GetLatestFloor(ctx, comment.ArticleID)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return 0, err
+	}
+	// 新评论使用最新楼层
+	comment.Floor = floor + 1
 	// 新增评论 TODO 待完善，需要走消息队保证楼层并发问题
 	cid, err := c.repo.CreateAndCached(ctx, comment)
 	if err != nil {

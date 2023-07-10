@@ -8,13 +8,16 @@ import (
 	"xmlt/internal/repository/cache"
 	"xmlt/internal/repository/dao"
 	"xmlt/internal/service"
+	"xmlt/middle"
 )
 
 type CommentRouter struct{}
 
 func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	commentRouter := router.Group("comment")
-	//
+	// 使用中间件
+	commentRouter.Use(middle.VerifyJWTMiddleware())
+	// 依赖注入
 	commentCache := cache.NewCommentRedisCache(global.Redis)
 	commentDao := dao.NewCommentDao(global.DB_MAKE)
 	commentService := service.NewCommentService(repository.NewCommentRepo(commentDao, commentCache))

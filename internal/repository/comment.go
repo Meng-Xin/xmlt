@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/enum"
 	"xmlt/internal/model"
@@ -22,11 +24,17 @@ type CommentRepo interface {
 	GetByArticleID(ctx context.Context, id uint64, paging domain.Paging, by domain.RangeBy) ([]domain.Comment, error)
 	// GetByUserID 根据 用户ID 获取评论
 	GetByUserID(ctx context.Context, id uint64, paging domain.Paging) ([]domain.Comment, error)
+	// GetLatestFloor 获取最新楼层
+	GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error)
 }
 
 type commentRepo struct {
 	dao   dao.CommentDao
 	cache cache.CommentCache
+}
+
+func (c *commentRepo) GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error) {
+	return c.dao.GetLatestFloorByArticleID(ctx, articleID)
 }
 
 func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Comment) (uint64, error) {
@@ -39,8 +47,27 @@ func (c *commentRepo) CreateAndCached(ctx context.Context, comment domain.Commen
 		Floor:     comment.Floor,
 		Ctime:     comment.Ctime,
 	}
+	// 存入消息队列
+	data, err := json.Marshal(entity)
+	if err != nil {
+		return 0, err
+	}
+	err = global.RabbitMQ.PublishOnQueue(ctx, data)
+	if err != nil {
+		return 0, err
+	}
+	// 从消息队列获取
+	queueData, err := global.RabbitMQ.SubscribeToQueue("评论消费")
+	if err != nil {
+		return 0, err
+	}
+	endData := model.Comment{}
+	err = json.Unmarshal(queueData, &endData)
+	if err != nil {
+		return 0, err
+	}
 	// 写入缓存
-	id, err := c.dao.Insert(ctx, entity)
+	id, err := c.dao.Insert(ctx, endData)
 	if err != nil {
 		return 0, err
 	}
