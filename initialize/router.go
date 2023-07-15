@@ -19,7 +19,8 @@ func NewRouter() *gin.Engine {
 	r.Use(middle.NewRateLimiterMiddleware(global.Redis, "general", 200, 60*time.Second))
 	// 全局日志中间件
 	r.Use(middle.LoggerToFile())
-
+	// 全局跨域请求
+	r.Use(middle.CORSMiddleware())
 	var publicGroup, privateGroup, v1 *gin.RouterGroup
 	// 公共路由组
 	publicGroup = r.Group("/")
