@@ -76,6 +76,7 @@ func Migration(db *gorm.DB) {
 	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(
 		model.User{},
 		model.Article{},
+		model.UserLikeArticle{},
 		model.Tag{},
 		model.Category{},
 		model.Comment{},
