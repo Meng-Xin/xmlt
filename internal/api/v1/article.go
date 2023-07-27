@@ -110,7 +110,7 @@ type ArticleSave struct {
 	Title       string `form:"title" json:"title" binding:"required"`           // 帖子标题
 	Content     string `form:"content" json:"content" binding:"required"`       // 帖子内容
 	Status      uint8  `form:"status" json:"status"`                            // 帖子状态
-	CategoryID  uint16 `json:"categoryID" form:"categoryID" binding:"required"` // 所属板块
+	CategoryID  uint64 `json:"categoryID" form:"categoryID" binding:"required"` // 所属板块
 	NiceTopic   uint8  `json:"niceTopic" from:"niceTopic"`                      // 精选话题
 	BrowseCount uint64 `json:"browseCount" from:"browseCount"`                  // 浏览量
 	ThumbsUP    uint32 `json:"thumbsUP" form:"thumbsUP"`                        // 点赞数

@@ -17,6 +17,7 @@ type ArticleDAO interface {
 	Insert(ctx context.Context, article model.Article) (uint64, error)
 	Update(ctx context.Context, article model.Article) error
 	GetByID(ctx context.Context, id uint64) (model.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64) ([]model.Article, error)
 }
 
 func NewArticleDAO(db *gorm.DB) ArticleDAO {
@@ -63,4 +64,10 @@ func AfterCreate(db *gorm.DB) error {
 		}
 	}
 	return nil
+}
+
+func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64) ([]model.Article, error) {
+	var articles []model.Article
+	err := c.db.WithContext(ctx).Find(&articles).Where("category_id=?", categoryID).Error
+	return articles, err
 }

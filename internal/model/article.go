@@ -9,7 +9,7 @@ type Article struct {
 	Status       uint8  `gorm:"comment:帖子状态 0:审核、1:正常、2:删除"`
 
 	Author      uint64 `gorm:"index;not null;comment:作者ID"`
-	CategoryID  uint16 `gorm:"index;not null;comment:所属板块ID"`
+	CategoryID  uint64 `gorm:"index;not null;comment:所属板块ID"`
 	NiceTopic   uint8  `gorm:"comment:精选话题"`
 	BrowseCount uint64 `gorm:"comment:浏览量"`
 	ThumbsUP    uint32 `gorm:"comment:点赞数"`
