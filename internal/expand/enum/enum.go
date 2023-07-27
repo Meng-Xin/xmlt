@@ -24,3 +24,9 @@ type PageNum = int
 const (
 	MaxLimitNum PageNum = 20 // 最大分页获取数量
 )
+
+type RedisKey = string
+
+const (
+	AllCategory RedisKey = "categoryList" // Redis存储主题
+)
