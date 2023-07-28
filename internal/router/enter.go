@@ -1,8 +1,9 @@
 package router
 
 type RouteGroup struct {
-	ArticleRouter
 	UserRouter
+	ArticleRouter
+	UserLikeArticleRouter
 	CommentRouter
 	CategoryRouter
 }
