@@ -25,8 +25,16 @@ const (
 	MaxLimitNum PageNum = 20 // 最大分页获取数量
 )
 
+type ContextKey = string
+
+const (
+	CtxUid      ContextKey = "uid"
+	CtxUserName ContextKey = "user_name"
+)
+
 type RedisKey = string
 
 const (
-	AllCategory RedisKey = "categoryList" // Redis存储主题
+	AllCategory     RedisKey = "category_list"        // Redis存储主题
+	UserLikeArticle RedisKey = "user_like_article_%d" // Redis存储主题
 )

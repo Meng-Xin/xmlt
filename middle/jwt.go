@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"xmlt/internal/expand/e"
+	"xmlt/internal/expand/enum"
 	"xmlt/internal/expand/public"
 	"xmlt/utils"
 )
@@ -41,8 +42,8 @@ func VerifyJWTMiddleware() gin.HandlerFunc {
 		if err != nil {
 			return
 		}
-		c.Set("uid", payLoad.UserID)
-		c.Set("username", payLoad.Username)
+		c.Set(enum.CtxUid, payLoad.UserID)
+		c.Set(enum.CtxUserName, payLoad.Username)
 		// 这里是否要通知客户端重新保存新的Token
 		c.Next()
 	}
