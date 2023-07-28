@@ -40,12 +40,14 @@ func NewRouter() *gin.Engine {
 	// V1管理
 	v1 = r.Group("/api/v1")
 	{
+		// User 用户
+		allRouter.UserRouter.InitApiRouter(v1)
 		// Category 主题
 		allRouter.CategoryRouter.InitApiRouter(v1)
 		// Article 帖子
 		allRouter.ArticleRouter.InitApiRouter(v1)
-		// User 用户
-		allRouter.UserRouter.InitApiRouter(v1)
+		// UserLikeArticle 用户点赞模块
+		allRouter.UserLikeArticleRouter.InitApiRouter(v1)
 		// Comment 评论
 		allRouter.CommentRouter.InitApiRouter(v1)
 	}
