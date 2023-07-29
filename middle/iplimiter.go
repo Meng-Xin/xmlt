@@ -31,6 +31,7 @@ func NewRateLimiterMiddleware(redisClient *redis.Client, key string, limit int, 
 				"status":  http.StatusTooManyRequests,
 				"message": "too many request",
 			})
+			c.Abort()
 			return
 		}
 

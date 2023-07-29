@@ -15,7 +15,8 @@ func BucketRateLimiter() gin.HandlerFunc {
 				"status":  http.StatusTooManyRequests,
 				"message": "too many request",
 			})
-			ctx.Done()
+			ctx.Abort()
+			return
 		}
 	}
 }

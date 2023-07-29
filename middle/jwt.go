@@ -27,6 +27,7 @@ func VerifyJWTMiddleware() gin.HandlerFunc {
 			code = e.TokenExpired
 			c.JSON(http.StatusOK, public.Response{Status: code, Msg: e.GetMsg(code)})
 			c.Abort()
+			return
 		}
 		// 如果用户刷新Token，那么使用新Token 解析，如果没有到期使用老Token。
 		var parseToken string
