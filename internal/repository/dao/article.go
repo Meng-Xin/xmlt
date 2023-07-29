@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"time"
 	"xmlt/global"
+	"xmlt/internal/domain"
 	"xmlt/internal/model"
 	"xmlt/utils"
 )
@@ -17,7 +18,7 @@ type ArticleDAO interface {
 	Insert(ctx context.Context, article model.Article) (uint64, error)
 	Update(ctx context.Context, article model.Article) error
 	GetByID(ctx context.Context, id uint64) (model.Article, error)
-	GetArticlesByCategoryID(ctx context.Context, categoryID uint64) ([]model.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]model.Article, error)
 }
 
 func NewArticleDAO(db *gorm.DB) ArticleDAO {
@@ -66,8 +67,8 @@ func AfterCreate(db *gorm.DB) error {
 	return nil
 }
 
-func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64) ([]model.Article, error) {
+func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]model.Article, error) {
 	var articles []model.Article
-	err := c.db.WithContext(ctx).Find(&articles).Where("category_id=?", categoryID).Error
+	err := c.db.WithContext(ctx).Find(&articles).Where("category_id=? And Status=1", categoryID).Limit(paging.Limit).Offset(paging.Offset).Error
 	return articles, err
 }

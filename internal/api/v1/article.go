@@ -55,7 +55,7 @@ func (a *ArticleController) Save(ctx *gin.Context) {
 		return
 	}
 	// 从 jwtmiddler 中拿到解析的UID
-	authorID := uint64(ctx.GetInt64("uid"))
+	authorID := ctx.GetUint64(enum.CtxUid)
 	_, err := a.service.Save(ctx.Request.Context(), domain.Article{
 		Title:      data.Title,
 		Content:    data.Content,
@@ -85,7 +85,7 @@ func (a *ArticleController) Publish(ctx *gin.Context) {
 		return
 	}
 	// CheckPushPermission 检查权限
-	authorID := uint64(ctx.GetInt64("uid"))
+	authorID := ctx.GetUint64(enum.CtxUid)
 	err = a.service.Publish(ctx, domain.Article{
 		ID:         data.ID,
 		Title:      data.Title,
@@ -113,7 +113,7 @@ type ArticleSave struct {
 	CategoryID  uint64 `json:"categoryID" form:"categoryID" binding:"required"` // 所属板块
 	NiceTopic   uint8  `json:"niceTopic" from:"niceTopic"`                      // 精选话题
 	BrowseCount uint64 `json:"browseCount" from:"browseCount"`                  // 浏览量
-	ThumbsUP    uint32 `json:"thumbsUP" form:"thumbsUP"`                        // 点赞数
+	ThumbsUP    uint64 `json:"thumbsUP" form:"thumbsUP"`                        // 点赞数
 	Author      uint64 // 作者
 	// 一般来说，考虑到各种 APP 发版本不容易，
 	// 所以数字、货币、日期、国际化之类的都是后端做的

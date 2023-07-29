@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
 	"xmlt/internal/repository"
@@ -11,6 +12,7 @@ type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (uint64, error)
 	Publish(ctx context.Context, article domain.Article) error
 	Get(ctx context.Context, id uint64, source int) (domain.Article, error)
+	GetCategoryArticles(ctx context.Context, categoryID uint64, paging domain.Paging) ([]domain.Article, error)
 }
 
 type articleService struct {
@@ -23,6 +25,13 @@ func NewArticleService(bRepo repository.ArticleRepo, cRepo repository.ArticleRep
 		bRepo: bRepo,
 		cRepo: cRepo,
 	}
+}
+
+func (a *articleService) GetCategoryArticles(ctx context.Context, categoryID uint64, paging domain.Paging) ([]domain.Article, error) {
+	if categoryID == 0 {
+		return nil, errors.New("不存在该主题")
+	}
+	return a.cRepo.GetArticlesByCategoryID(ctx, categoryID, paging)
 }
 
 // Save 在 service 层面上才会有创建或者更新的概念。repository 的职责更加单纯一点

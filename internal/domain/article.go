@@ -13,7 +13,7 @@ type Article struct {
 	CategoryID  uint64 // 所属板块
 	NiceTopic   uint8  // 精选话题
 	BrowseCount uint64 // 浏览量
-	ThumbsUP    uint32 // 点赞数
+	ThumbsUP    uint64 // 点赞数
 
 	Ctime time.Time
 	Utime time.Time

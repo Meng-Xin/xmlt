@@ -12,7 +12,7 @@ type Article struct {
 	CategoryID  uint64 `gorm:"index;not null;comment:所属板块ID"`
 	NiceTopic   uint8  `gorm:"comment:精选话题"`
 	BrowseCount uint64 `gorm:"comment:浏览量"`
-	ThumbsUP    uint32 `gorm:"comment:点赞数"`
+	ThumbsUP    uint64 `gorm:"comment:点赞数"`
 
 	Tags []Tag `gorm:"many2many:article_tag;"` // Tag : Article -> N:N
 
