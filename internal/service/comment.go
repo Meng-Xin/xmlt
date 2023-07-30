@@ -15,11 +15,11 @@ type CommentService interface {
 	// DeleteComment 删除评论 (修改评论状态)
 	DeleteComment(ctx context.Context, comment domain.Comment) error
 	// GetArtComment 获取帖子评论
-	GetArtComment(ctx context.Context, articleID uint64, paging domain.Paging, by domain.RangeBy) ([]domain.Comment, error)
+	GetArtComment(ctx context.Context, articleID uint64, paging domain.Page, by domain.RangeBy) ([]domain.Comment, error)
 	// GetReplyComment 获取回复评论
 	GetReplyComment(ctx context.Context, commentID uint64) (domain.Comment, error)
 	// GetUserComment 获取用户评论
-	GetUserComment(ctx context.Context, userID uint64, paging domain.Paging) ([]domain.Comment, error)
+	GetUserComment(ctx context.Context, userID uint64, paging domain.Page) ([]domain.Comment, error)
 }
 
 type commentService struct {
@@ -45,17 +45,17 @@ func (c *commentService) DeleteComment(ctx context.Context, comment domain.Comme
 	return c.repo.Update(ctx, comment)
 }
 
-func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, paging domain.Paging, by domain.RangeBy) ([]domain.Comment, error) {
+func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, paging domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
 	// 参数合法校验
-	if paging.Limit == 0 {
-		return nil, e.PagingIsNullError
-	}
+	//if paging.Limit == 0 {
+	//	return nil, e.PagingIsNullError
+	//}
 	if by.Start == 0 && by.Stop == 0 {
 		return nil, e.PagingIsNullError
 	}
-	if paging.Offset > enum.MaxLimitNum {
-		return nil, e.PagingMaxLimitError
-	}
+	//if paging.Offset > enum.MaxLimitNum {
+	//	return nil, e.PagingMaxLimitError
+	//}
 	if int(utils.Abs(by.Start-by.Stop)) > enum.MaxLimitNum {
 		return nil, e.PagingMaxLimitError
 	}
@@ -67,7 +67,7 @@ func (c *commentService) GetReplyComment(ctx context.Context, commentID uint64) 
 	return c.repo.Get(ctx, commentID)
 }
 
-func (c *commentService) GetUserComment(ctx context.Context, userID uint64, paging domain.Paging) ([]domain.Comment, error) {
+func (c *commentService) GetUserComment(ctx context.Context, userID uint64, paging domain.Page) ([]domain.Comment, error) {
 	return c.repo.GetByUserID(ctx, userID, paging)
 }
 

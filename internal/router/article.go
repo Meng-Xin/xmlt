@@ -27,6 +27,7 @@ func (a *ArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	articleCtl := v1.NewArticleController(articleService)
 	{
 		publicRouter.GET("/read/:id", articleCtl.GetByID)
+		publicRouter.GET("/read/", articleCtl.GetArticleByCate)
 		articleRouter.GET("/new", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "前端路由：新建文章")
 		})

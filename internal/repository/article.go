@@ -21,7 +21,7 @@ type ArticleRepo interface {
 	// 这里就会有一个很重要的概念，叫做延迟加载，但是 GO 是做不了的，
 	// 所以只能考虑传递标记位，或者使用新方法来控制要不要把 Author 组装起来
 	Get(ctx context.Context, id uint64) (domain.Article, error)
-	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]domain.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error)
 }
 
 func NewArticleRepo(dao dao.ArticleDAO, artCache cache.ArticleCache) ArticleRepo {
@@ -131,7 +131,7 @@ func (a *articleRepo) Get(ctx context.Context, id uint64) (domain.Article, error
 	return art, nil
 }
 
-func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]domain.Article, error) {
+func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error) {
 	// 缓存未命中，执行数据库查询，并重新更新Redis
 	data, err := a.dao.GetArticlesByCategoryID(ctx, categoryID, paging)
 	if err != nil {

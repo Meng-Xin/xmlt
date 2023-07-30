@@ -18,7 +18,7 @@ type ArticleDAO interface {
 	Insert(ctx context.Context, article model.Article) (uint64, error)
 	Update(ctx context.Context, article model.Article) error
 	GetByID(ctx context.Context, id uint64) (model.Article, error)
-	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]model.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]model.Article, error)
 }
 
 func NewArticleDAO(db *gorm.DB) ArticleDAO {
@@ -67,8 +67,11 @@ func AfterCreate(db *gorm.DB) error {
 	return nil
 }
 
-func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging domain.Paging) ([]model.Article, error) {
+func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, page *domain.Page) ([]model.Article, error) {
 	var articles []model.Article
-	err := c.db.WithContext(ctx).Find(&articles).Where("category_id=? And Status=1", categoryID).Limit(paging.Limit).Offset(paging.Offset).Error
+	// 插入分页构造
+	err := c.db.WithContext(ctx).Scopes(page.Paginate()).Where("category_id=?", categoryID).Find(&articles).Error
+	fmt.Println(articles)
+	//err := c.db.Where("category_id=? And Status=1", categoryID).Find(&articles).Error
 	return articles, err
 }

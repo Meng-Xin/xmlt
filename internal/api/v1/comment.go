@@ -6,6 +6,7 @@ import (
 	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
+	"xmlt/internal/expand/enum"
 	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
 )
@@ -26,7 +27,7 @@ func (c *CommentController) Create(ctx *gin.Context) {
 		global.Log.Info(err.Error())
 		return
 	}
-	uid := uint64(ctx.GetInt64("uid"))
+	uid := ctx.GetUint64(enum.CtxUid)
 	// 新增评论
 	err = c.service.AddComment(ctx, domain.Comment{
 		Content:   com.Content,

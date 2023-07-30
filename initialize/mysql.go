@@ -1,8 +1,10 @@
 package initialize
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/time/rate"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -10,6 +12,10 @@ import (
 	"time"
 	"xmlt/global"
 	"xmlt/internal/model"
+)
+
+var (
+	GormToManyRequestError = errors.New("gorm: to many request")
 )
 
 func InitDatabase(makeDSN string, onlineDSN string) {
@@ -37,8 +43,10 @@ func InitDatabase(makeDSN string, onlineDSN string) {
 	sqlDB.SetMaxIdleConns(20)  //设置连接池，空闲
 	sqlDB.SetMaxOpenConns(100) //打开
 	sqlDB.SetConnMaxLifetime(time.Second * 30)
-	// 制作库开启 慢查询日志 Callback
+
+	// 中间件引入
 	SlowQueryLog(dbMake)
+	GormRateLimiter(dbMake, rate.NewLimiter(500, 1000))
 
 	dbOnline, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       onlineDSN, // DSN data source name
@@ -57,6 +65,11 @@ func InitDatabase(makeDSN string, onlineDSN string) {
 	onlineDB.SetMaxIdleConns(20)  //设置连接池，空闲
 	onlineDB.SetMaxOpenConns(100) //打开
 	onlineDB.SetConnMaxLifetime(time.Second * 30)
+
+	// 中间件引入
+	SlowQueryLog(dbMake)
+	GormRateLimiter(dbOnline, rate.NewLimiter(500, 1000))
+
 	if err != nil {
 		panic(err)
 	}
@@ -105,6 +118,20 @@ func SlowQueryLog(db *gorm.DB) {
 			if duration > time.Millisecond*10 {
 				global.Log.Error("慢查询 %s", d.Statement.SQL.String())
 			}
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// GormRateLimiter Gorm限流器 此限流器不能终止GORM查询链。
+func GormRateLimiter(db *gorm.DB, r *rate.Limiter) {
+	err := db.Callback().Query().Before("*").Register("RateLimitGormMiddleware", func(d *gorm.DB) {
+		if !r.Allow() {
+			d.AddError(GormToManyRequestError)
+			global.Log.Error(GormToManyRequestError.Error())
+			return
 		}
 	})
 	if err != nil {

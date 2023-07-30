@@ -49,7 +49,7 @@ func (h *HomeController) GetHomeInfo(ctx *gin.Context) {
 	}
 	var artsVo []articleHome
 	// 获取首页文章列表
-	articles, err := h.ArticleService.GetCategoryArticles(ctx, firstCate.ID, domain.Paging{Limit: 10, Offset: 0})
+	articles, err := h.ArticleService.GetCategoryArticles(ctx, firstCate.ID, domain.NewPage(1, 1))
 	if err != nil {
 		code = e.ERROR
 		ctx.JSON(http.StatusOK, public.Response{
