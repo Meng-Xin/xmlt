@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"xmlt/global"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
@@ -48,8 +49,22 @@ func (c *CommentController) Create(ctx *gin.Context) {
 func (c *CommentController) Delete(ctx *gin.Context) {
 
 }
-func (c *CommentController) Get(ctx *gin.Context) {
+func (c *CommentController) GetArtComment(ctx *gin.Context) {
+	code := e.SUCCESS
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	pageSize, _ := strconv.Atoi(ctx.Query("page_size"))
+	articleId, _ := strconv.ParseUint(ctx.Query("article_id"), 10, 64)
 
+	pageInfo := domain.NewPage(page, pageSize)
+	rangeBy := domain.NewRange(pageInfo)
+	artComment, err := c.service.GetArtComment(ctx.Request.Context(), articleId, pageInfo, *rangeBy)
+	if err != nil {
+		return
+	}
+	ctx.JSON(http.StatusOK, public.Response{
+		Status: code,
+		Data:   artComment,
+	})
 }
 func (c *CommentController) GetByUserID(ctx *gin.Context) {
 

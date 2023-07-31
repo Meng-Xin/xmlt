@@ -38,7 +38,7 @@ func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 		// 删除评论
 		commentRouter.POST("/delete", commentCtrl.Delete)
 		// 拉取文章下的所有评论
-		commentRouter.POST("/get", commentCtrl.Get)
+		commentRouter.GET("/get", commentCtrl.GetArtComment)
 		// 拉取某个用户所有评论
 		commentRouter.POST("/getByUserID", commentCtrl.GetByUserID)
 		// TODO 拉取某个单独评论信息，这个一般是在通知模块用的，这里写这个接口不合适

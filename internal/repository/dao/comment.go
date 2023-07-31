@@ -57,14 +57,14 @@ func (c *commentGORM) GetByParentID(ctx context.Context, parentID uint64, paging
 
 func (c *commentGORM) GetByArticleID(ctx context.Context, articleID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
-	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("article_id=?", articleID).Find(comments).Error
+	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("article_id=?", articleID).Find(&comments).Error
 	return comments, err
 }
 
 func (c *commentGORM) GetByUserID(ctx context.Context, userID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
 	// Scopes 引入后 直接对数据进行查找，并且内部已经封装好了过滤。
-	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("user_id=?", userID).Find(comments).Error
+	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("user_id=?", userID).Find(&comments).Error
 	return comments, err
 }
 

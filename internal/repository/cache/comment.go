@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
 	"time"
@@ -51,6 +52,9 @@ func (c *commentRedisCache) ZGet(ctx context.Context, articleID uint64, by domai
 		result, err = c.client.WithContext(ctx).ZRange(
 			fmt.Sprintf("article_comments_%d", articleID), by.Start, by.Stop,
 		).Result()
+		if len(result) == 0 {
+			return nil, errors.New("空数据")
+		}
 		if err != nil {
 			return comments, err
 		}
@@ -58,6 +62,9 @@ func (c *commentRedisCache) ZGet(ctx context.Context, articleID uint64, by domai
 		result, err = c.client.WithContext(ctx).ZRevRange(
 			fmt.Sprintf("article_comments_%d", articleID), by.Start, by.Stop,
 		).Result()
+		if len(result) == 0 {
+			return nil, errors.New("空数据")
+		}
 		if err != nil {
 			return comments, err
 		}
