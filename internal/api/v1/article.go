@@ -51,7 +51,8 @@ func (a *ArticleController) GetArticleByCate(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.Query("page"))
 	pageSize, _ := strconv.Atoi(ctx.Query("page_size"))
 
-	arts, err := a.service.GetCategoryArticles(ctx.Request.Context(), category, domain.NewPage(page, pageSize))
+	pageEntity := domain.NewPage(page, pageSize)
+	arts, err := a.service.GetCategoryArticles(ctx.Request.Context(), category, pageEntity)
 	if err != nil {
 		// TODO 如果代码严谨的话，这边要区别是真的没有数据，还是服务器出现了异常
 		return
@@ -63,9 +64,14 @@ func (a *ArticleController) GetArticleByCate(ctx *gin.Context) {
 		articleVo.init(arts[i])
 		vo = append(vo, articleVo)
 	}
+
+	response := ArticleListResponse{
+		PageInfo: pageEntity,
+		Articles: vo,
+	}
 	ctx.JSON(http.StatusOK, public.Response{
 		Status: code,
-		Data:   vo,
+		Data:   response,
 	})
 }
 
@@ -158,4 +164,9 @@ func (a *ArticleSave) init(art domain.Article) {
 	a.Author = art.Author
 	a.Ctime = art.Ctime.String()
 	a.Utime = art.Utime.String()
+}
+
+type ArticleListResponse struct {
+	PageInfo *domain.Page  // 分页信息
+	Articles []ArticleSave // 文章列表
 }

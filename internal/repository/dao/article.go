@@ -70,8 +70,6 @@ func AfterCreate(db *gorm.DB) error {
 func (c *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, page *domain.Page) ([]model.Article, error) {
 	var articles []model.Article
 	// 插入分页构造
-	err := c.db.WithContext(ctx).Scopes(page.Paginate()).Where("category_id=?", categoryID).Find(&articles).Error
-	fmt.Println(articles)
-	//err := c.db.Where("category_id=? And Status=1", categoryID).Find(&articles).Error
+	err := c.db.WithContext(ctx).Scopes(page.Paginate(&model.Article{})).Where("category_id=?", categoryID).Find(&articles).Error
 	return articles, err
 }
