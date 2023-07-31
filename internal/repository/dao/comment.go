@@ -15,11 +15,11 @@ type CommentDao interface {
 	// GetByID 根据评论ID获取评论
 	GetByID(ctx context.Context, cid uint64) (model.Comment, error)
 	// GetByParentID 根据 父级评论ID 获取评论
-	GetByParentID(ctx context.Context, parentID uint64, paging domain.Page) ([]model.Comment, error)
+	GetByParentID(ctx context.Context, parentID uint64, paging *domain.Page) ([]model.Comment, error)
 	// GetByArticleID 根据 帖子ID 获取评论
-	GetByArticleID(ctx context.Context, articleID uint64, paging domain.Page) ([]model.Comment, error)
+	GetByArticleID(ctx context.Context, articleID uint64, paging *domain.Page) ([]model.Comment, error)
 	// GetByUserID 根据 用户ID 获取评论
-	GetByUserID(ctx context.Context, userID uint64, paging domain.Page) ([]model.Comment, error)
+	GetByUserID(ctx context.Context, userID uint64, paging *domain.Page) ([]model.Comment, error)
 	// GetLatestFloorByArticleID 根据 文章ID 获取评论最新楼层
 	GetLatestFloorByArticleID(ctx context.Context, articleID uint64) (uint32, error)
 }
@@ -49,24 +49,22 @@ func (c *commentGORM) GetByID(ctx context.Context, cid uint64) (model.Comment, e
 	return comment, err
 }
 
-func (c *commentGORM) GetByParentID(ctx context.Context, parentID uint64, paging domain.Page) ([]model.Comment, error) {
+func (c *commentGORM) GetByParentID(ctx context.Context, parentID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
-	//err := c.db.WithContext(ctx).Where("parent_id=?", parentID).Offset(paging.Offset).Limit(paging.Limit).Find(&comments).Error
-	err := c.db.WithContext(ctx).Where("parent_id=?", parentID).Find(&comments).Error
+	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("parent_id=?", parentID).Find(&comments).Error
 	return comments, err
 }
 
-func (c *commentGORM) GetByArticleID(ctx context.Context, articleID uint64, paging domain.Page) ([]model.Comment, error) {
+func (c *commentGORM) GetByArticleID(ctx context.Context, articleID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
-	//err := c.db.WithContext(ctx).Where("article_id=?", articleID).Offset(paging.Offset).Limit(paging.Limit).Find(comments).Error
-	err := c.db.WithContext(ctx).Where("article_id=?", articleID).Find(comments).Error
+	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("article_id=?", articleID).Find(comments).Error
 	return comments, err
 }
 
-func (c *commentGORM) GetByUserID(ctx context.Context, userID uint64, paging domain.Page) ([]model.Comment, error) {
+func (c *commentGORM) GetByUserID(ctx context.Context, userID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
-	//err := c.db.WithContext(ctx).Where("user_id=?", userID).Offset(paging.Offset).Limit(paging.Limit).Find(comments).Error
-	err := c.db.WithContext(ctx).Where("user_id=?", userID).Find(comments).Error
+	// Scopes 引入后 直接对数据进行查找，并且内部已经封装好了过滤。
+	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("user_id=?", userID).Find(comments).Error
 	return comments, err
 }
 

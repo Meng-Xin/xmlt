@@ -22,9 +22,9 @@ type CommentRepo interface {
 	// Get 获取单条评论信息
 	Get(ctx context.Context, id uint64) (domain.Comment, error)
 	// GetByArticleID 根据 帖子ID 获取评论
-	GetByArticleID(ctx context.Context, id uint64, paging domain.Page, by domain.RangeBy) ([]domain.Comment, error)
+	GetByArticleID(ctx context.Context, id uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error)
 	// GetByUserID 根据 用户ID 获取评论
-	GetByUserID(ctx context.Context, id uint64, paging domain.Page) ([]domain.Comment, error)
+	GetByUserID(ctx context.Context, id uint64, paging *domain.Page) ([]domain.Comment, error)
 	// GetLatestFloor 获取最新楼层
 	GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error)
 	// ConsumerMQ
@@ -130,7 +130,7 @@ func (c *commentRepo) Get(ctx context.Context, id uint64) (domain.Comment, error
 	return domain.Comment(daoComment), nil
 }
 
-func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
+func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
 	// 查询缓存
 	cacheComments, err := c.cache.ZGet(ctx, id, by)
 	if err == nil {
@@ -154,7 +154,7 @@ func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging doma
 	return comments, nil
 }
 
-func (c *commentRepo) GetByUserID(ctx context.Context, id uint64, paging domain.Page) ([]domain.Comment, error) {
+func (c *commentRepo) GetByUserID(ctx context.Context, id uint64, paging *domain.Page) ([]domain.Comment, error) {
 	var comments []domain.Comment
 	// 用户评论作为内部详细字段，暂无法从cache直接查询
 	daoComments, err := c.dao.GetByUserID(ctx, id, paging)
