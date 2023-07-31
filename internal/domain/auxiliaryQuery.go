@@ -22,8 +22,13 @@ func NewPage(page int, pageSize int) *Page {
 }
 
 // Paginate 分页
-func (p *Page) Paginate() func(*gorm.DB) *gorm.DB {
+func (p *Page) Paginate(table interface{}) func(*gorm.DB) *gorm.DB {
 	return func(d *gorm.DB) *gorm.DB {
+		// TODO 后续添加匹配规则，目前是每次查询都会下发。
+		// 拼接Count
+		countDb := d.Session(&gorm.Session{NewDB: true})
+		countDb.Model(table).Count(&p.Total)
+
 		// 过滤 当前页、单页数量； 计算总页数
 		if p.Page < 1 {
 			p.Page = 1
@@ -36,23 +41,14 @@ func (p *Page) Paginate() func(*gorm.DB) *gorm.DB {
 			p.PageSize = enum.MinPageSize
 		}
 
-		// 拼接分页
-		d.Offset(p.offset()).Limit(p.PageSize)
-		return d
-	}
-}
-
-// GetPagingStruct 获取分页构造
-func (p *Page) GetPagingStruct() func(*gorm.DB) *gorm.DB {
-	return func(d *gorm.DB) *gorm.DB {
-		// 拼接Count
-		d.Count(&p.Total)
 		// 计算总页数 Total / PageSize = Pages
 		p.Pages = p.Total / int64(p.PageSize)
 		// 如果还有余那么也可以查询
 		if p.Total%int64(p.PageSize) != 0 {
 			p.Pages++
 		}
+		// 拼接分页
+		d.Offset(p.offset()).Limit(p.PageSize)
 		return d
 	}
 }
