@@ -56,7 +56,7 @@ func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, pa
 	//if paging.Offset > enum.MaxLimitNum {
 	//	return nil, e.PagingMaxLimitError
 	//}
-	if int(utils.Abs(by.Start-by.Stop)) > enum.MaxLimitNum {
+	if int(utils.Abs(by.Start-by.Stop)) > enum.MaxPageSize {
 		return nil, e.PagingMaxLimitError
 	}
 	// 获取评论信息
