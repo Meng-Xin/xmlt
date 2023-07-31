@@ -2,6 +2,7 @@ package domain
 
 import (
 	"gorm.io/gorm"
+	"xmlt/internal/expand/enum"
 )
 
 // Page 分页查询 辅助结构
@@ -24,15 +25,15 @@ func NewPage(page int, pageSize int) *Page {
 func (p *Page) Paginate() func(*gorm.DB) *gorm.DB {
 	return func(d *gorm.DB) *gorm.DB {
 		// 过滤 当前页、单页数量； 计算总页数
-		if p.Page < 0 {
-			p.Page = 0
+		if p.Page < 1 {
+			p.Page = 1
 		}
 
 		switch {
 		case p.PageSize > 100:
-			p.PageSize = 100
+			p.PageSize = enum.MaxPageSize
 		case p.PageSize <= 0:
-			p.PageSize = 10
+			p.PageSize = enum.MinPageSize
 		}
 
 		// 拼接分页

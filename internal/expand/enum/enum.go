@@ -22,7 +22,8 @@ const (
 type PageNum = int
 
 const (
-	MaxLimitNum PageNum = 20 // 最大分页获取数量
+	MaxPageSize PageNum = 100 // 最大分页获取数量
+	MinPageSize PageNum = 10  // 最小分页获取数量
 )
 
 type ContextKey = string
