@@ -12,7 +12,7 @@ import (
 	"xmlt/middle"
 )
 
-type ArticleRouter struct{}
+type ArticleRouter struct{ service service.ArticleService }
 
 func (a *ArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	articleRouter := router.Group("article")
@@ -20,11 +20,11 @@ func (a *ArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	articleRouter.Use(middle.VerifyJWTMiddleware())
 	// 依赖注入
 	artCache := cache.NewArticleRedisCache(global.Redis)
-	articleService := service.NewArticleService(
+	a.service = service.NewArticleService(
 		repository.NewArticleRepo(dao.NewArticleDAO(global.DB_ONLINE), artCache), // 加载线上库 - 用户
 		repository.NewArticleRepo(dao.NewArticleDAO(global.DB_MAKE), artCache),   // 加载制作库 - 作者
 	)
-	articleCtl := v1.NewArticleController(articleService)
+	articleCtl := v1.NewArticleController(a.service)
 	{
 		publicRouter.GET("/read/:id", articleCtl.GetByID)
 		publicRouter.GET("/read/", articleCtl.GetArticleByCate)

@@ -16,6 +16,7 @@ type Article struct {
 
 	Tags []Tag `gorm:"many2many:article_tag;"` // Tag : Article -> N:N
 
+	User  User  `gorm:"foreignKey:Author"`
 	Ctime int64 // 创建时间，毫秒作为单位
 	Utime int64 // 更新时间，毫秒作为单位
 }

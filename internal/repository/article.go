@@ -146,7 +146,12 @@ func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID ui
 			Author:      data[i].Author,
 			NiceTopic:   data[i].NiceTopic,
 			BrowseCount: data[i].BrowseCount,
-			Ctime:       time.UnixMilli(data[i].Ctime),
+			User: domain.User{
+				ID:       data[i].User.ID,
+				NickName: data[i].User.NickName,
+				Avatar:   data[i].User.Avatar,
+			},
+			Ctime: time.UnixMilli(data[i].Ctime),
 		}
 		entities = append(entities, entity)
 	}

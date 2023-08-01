@@ -15,6 +15,7 @@ type Article struct {
 	BrowseCount uint64 // 浏览量
 	ThumbsUP    uint64 // 点赞数
 
+	User  User
 	Ctime time.Time
 	Utime time.Time
 }

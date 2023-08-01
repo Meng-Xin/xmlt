@@ -148,6 +148,11 @@ type ArticleSave struct {
 	// 一般来说，考虑到各种 APP 发版本不容易，
 	// 所以数字、货币、日期、国际化之类的都是后端做的
 	// 前端就是无脑展示
+	UserInfo struct {
+		ID       uint64
+		NickName string
+		Avatar   string
+	}
 	Ctime string
 	Utime string
 }
@@ -162,6 +167,9 @@ func (a *ArticleSave) init(art domain.Article) {
 	a.BrowseCount = art.BrowseCount
 	a.ThumbsUP = art.ThumbsUP
 	a.Author = art.Author
+	a.UserInfo.ID = art.User.ID
+	a.UserInfo.NickName = art.User.NickName
+	a.UserInfo.Avatar = art.User.Avatar
 	a.Ctime = art.Ctime.String()
 	a.Utime = art.Utime.String()
 }
