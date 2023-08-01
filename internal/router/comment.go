@@ -19,8 +19,10 @@ type CommentRouter struct {
 
 func (c *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	commentRouter := router.Group("comment")
+	pubCommentRouter := router.Group("comment")
 	// 使用中间件
 	commentRouter.Use(middle.VerifyJWTMiddleware())
+
 	// 依赖注入
 	commentCache := cache.NewCommentRedisCache(global.Redis)
 	commentDao := dao.NewCommentDao(global.DB_MAKE)
@@ -40,7 +42,7 @@ func (c *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 		// 删除评论
 		commentRouter.POST("/delete", commentCtrl.Delete)
 		// 拉取文章下的所有评论
-		commentRouter.GET("/get", commentCtrl.GetArtComment)
+		pubCommentRouter.GET("/get", commentCtrl.GetArtComment)
 		// 拉取某个用户所有评论
 		commentRouter.POST("/getByUserID", commentCtrl.GetByUserID)
 		// TODO 拉取某个单独评论信息，这个一般是在通知模块用的，这里写这个接口不合适
