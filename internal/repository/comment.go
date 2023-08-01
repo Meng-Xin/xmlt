@@ -7,10 +7,11 @@ import (
 	"gorm.io/gorm"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/enum"
 	"xmlt/internal/model"
 	"xmlt/internal/repository/cache"
 	"xmlt/internal/repository/dao"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/enum"
 	"xmlt/utils"
 )
 
@@ -22,9 +23,9 @@ type CommentRepo interface {
 	// Get 获取单条评论信息
 	Get(ctx context.Context, id uint64) (domain.Comment, error)
 	// GetByArticleID 根据 帖子ID 获取评论
-	GetByArticleID(ctx context.Context, id uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error)
+	GetByArticleID(ctx context.Context, id uint64, paging *shared.Page, by shared.RangeBy) ([]domain.Comment, error)
 	// GetByUserID 根据 用户ID 获取评论
-	GetByUserID(ctx context.Context, id uint64, paging *domain.Page) ([]domain.Comment, error)
+	GetByUserID(ctx context.Context, id uint64, paging *shared.Page) ([]domain.Comment, error)
 	// GetLatestFloor 获取最新楼层
 	GetLatestFloor(ctx context.Context, articleID uint64) (uint32, error)
 	// ConsumerMQ
@@ -43,20 +44,29 @@ func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 		return err
 	}
 	go func() error {
+		var endData model.Comment
+		defer func() {
+			// 未能正常消费信息捕获，放入死信队列。
+			if err := recover(); err != nil {
+				global.Log.Error("消息队列存在无法正常消费数据：", err)
+				// TODO 把本次数据信息丢入死信队列！
+				global.Log.Info("死信：", endData)
+			}
+		}()
 		for msg := range msgs {
-			endData := model.Comment{}
+			endData = model.Comment{}
 			err = json.Unmarshal(msg.Body, &endData)
 			if err != nil {
 				return err
 			}
 			floor, err := c.GetLatestFloor(ctx, endData.ArticleID)
 			if err != nil && err != gorm.ErrRecordNotFound {
-				return err
+				panic(err)
 			}
 			endData.Floor = floor + 1
 			_, err = c.dao.Insert(ctx, endData)
 			if err != nil {
-				return err
+				panic(err)
 			}
 			// 写入缓存
 			err = c.cache.Set(ctx, c.dataBuild(endData))
@@ -130,7 +140,7 @@ func (c *commentRepo) Get(ctx context.Context, id uint64) (domain.Comment, error
 	return c.dataBuild(daoComment), nil
 }
 
-func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
+func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *shared.Page, by shared.RangeBy) ([]domain.Comment, error) {
 	// 查询缓存
 	cacheComments, err := c.cache.ZGet(ctx, id, by)
 	if err == nil {
@@ -154,7 +164,7 @@ func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *dom
 	return comments, nil
 }
 
-func (c *commentRepo) GetByUserID(ctx context.Context, id uint64, paging *domain.Page) ([]domain.Comment, error) {
+func (c *commentRepo) GetByUserID(ctx context.Context, id uint64, paging *shared.Page) ([]domain.Comment, error) {
 	var comments []domain.Comment
 	// 用户评论作为内部详细字段，暂无法从cache直接查询
 	daoComments, err := c.dao.GetByUserID(ctx, id, paging)
@@ -182,10 +192,5 @@ func (c *commentRepo) dataBuild(comment model.Comment) domain.Comment {
 		State:     comment.State,
 		Ctime:     comment.Ctime,
 		Utime:     comment.Utime,
-		User: domain.User{
-			ID:       comment.UserID,
-			NickName: comment.User.NickName,
-			Avatar:   comment.User.Avatar,
-		},
 	}
 }
