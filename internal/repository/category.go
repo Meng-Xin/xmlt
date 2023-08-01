@@ -4,10 +4,10 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
 	"xmlt/internal/model"
 	"xmlt/internal/repository/cache"
 	"xmlt/internal/repository/dao"
+	"xmlt/internal/shared/e"
 	"xmlt/utils"
 )
 
@@ -34,6 +34,7 @@ func (c *categoryRepo) Create(ctx context.Context, category domain.Category) (ui
 		Name:         category.Name,
 		Description:  category.Description,
 		ArticleCount: category.ArticleCount,
+		State:        true,
 		Ctime:        now,
 	}
 	return c.dao.Insert(ctx, entity)
@@ -67,11 +68,36 @@ func (c *categoryRepo) GetCategoryList(ctx context.Context) ([]domain.Category, 
 	var entities []domain.Category
 	for i, _ := range daoData {
 		entity := daoData[i]
-		entities = append(entities, domain.Category(entity))
+		entities = append(entities, c.dao2Dto(entity))
 	}
 	err = c.cache.Set(ctx, entities)
 	if err != nil {
 		log.Warning(e.RedisInsertError)
 	}
 	return entities, nil
+}
+
+func (c *categoryRepo) dao2Dto(entity model.Category) domain.Category {
+	domainCategory := domain.Category{
+		ID:           entity.ID,
+		Name:         entity.Name,
+		Description:  entity.Description,
+		ArticleCount: entity.ArticleCount,
+		Utime:        entity.Utime,
+	}
+	for _, daoArticle := range entity.Articles {
+		domainArticle := domain.Article{
+			ID:           daoArticle.ID,
+			Title:        daoArticle.Title,
+			Content:      daoArticle.Content,
+			CommentCount: daoArticle.CommentCount,
+			Status:       daoArticle.Status,
+			CategoryID:   daoArticle.CategoryID,
+			NiceTopic:    daoArticle.NiceTopic,
+			BrowseCount:  daoArticle.BrowseCount,
+			ThumbsUP:     daoArticle.ThumbsUP,
+		}
+		domainCategory.Articles = append(domainCategory.Articles, domainArticle)
+	}
+	return domainCategory
 }
