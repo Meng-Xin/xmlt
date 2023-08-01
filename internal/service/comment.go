@@ -4,9 +4,7 @@ import (
 	"context"
 	"xmlt/internal/domain"
 	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
 	"xmlt/internal/repository"
-	"xmlt/utils"
 )
 
 type CommentService interface {
@@ -46,19 +44,6 @@ func (c *commentService) DeleteComment(ctx context.Context, comment domain.Comme
 }
 
 func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
-	// 参数合法校验
-	//if paging.Limit == 0 {
-	//	return nil, e.PagingIsNullError
-	//}
-	if by.Start == 0 && by.Stop == 0 {
-		return nil, e.PagingIsNullError
-	}
-	//if paging.Offset > enum.MaxLimitNum {
-	//	return nil, e.PagingMaxLimitError
-	//}
-	if int(utils.Abs(by.Start-by.Stop)) > enum.MaxPageSize {
-		return nil, e.PagingMaxLimitError
-	}
 	// 获取评论信息
 	return c.repo.GetByArticleID(ctx, articleID, paging, by)
 }

@@ -10,6 +10,7 @@ type Comment struct {
 	Floor     uint32 `gorm:"index;not null;comment:评论楼层"`
 	State     uint8  `gorm:"comment:该评论状态"`
 
+	User  User  // 用户信息
 	Ctime int64 // 创建时间，毫秒作为单位
 	Utime int64 // 更新时间，毫秒作为单位
 }

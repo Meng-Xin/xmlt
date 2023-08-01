@@ -13,9 +13,11 @@ import (
 	"xmlt/middle"
 )
 
-type CommentRouter struct{}
+type CommentRouter struct {
+	service service.CommentService
+}
 
-func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
+func (c *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	commentRouter := router.Group("comment")
 	// 使用中间件
 	commentRouter.Use(middle.VerifyJWTMiddleware())
@@ -23,7 +25,7 @@ func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	commentCache := cache.NewCommentRedisCache(global.Redis)
 	commentDao := dao.NewCommentDao(global.DB_MAKE)
 	commentRepo := repository.NewCommentRepo(commentDao, commentCache)
-	commentService := service.NewCommentService(commentRepo)
+	c.service = service.NewCommentService(commentRepo)
 
 	// 挂载 RabbitMQ 对创建评论的处理
 	err := commentRepo.ConsumerMQ(context.Background())
@@ -31,7 +33,7 @@ func (a *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	if err != nil {
 		log.Error(err.Error())
 	}
-	commentCtrl := v1.NewCommentCtrl(commentService)
+	commentCtrl := v1.NewCommentCtrl(c.service)
 	{
 		// 新增评论
 		commentRouter.POST("/new", commentCtrl.Create)

@@ -57,7 +57,7 @@ func (c *commentGORM) GetByParentID(ctx context.Context, parentID uint64, paging
 
 func (c *commentGORM) GetByArticleID(ctx context.Context, articleID uint64, paging *domain.Page) ([]model.Comment, error) {
 	var comments []model.Comment
-	err := c.db.WithContext(ctx).Scopes(paging.Paginate(&model.Comment{})).Where("article_id=?", articleID).Find(&comments).Error
+	err := c.db.WithContext(ctx).Preload("User").Scopes(paging.Paginate(&model.Comment{})).Where("article_id=?", articleID).Find(&comments).Error
 	return comments, err
 }
 

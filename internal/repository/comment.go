@@ -59,8 +59,8 @@ func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 				return err
 			}
 			// 写入缓存
-			err = c.cache.Set(ctx, domain.Comment(endData))
-			err = c.cache.ZAdd(ctx, domain.Comment(endData))
+			err = c.cache.Set(ctx, c.dataBuild(endData))
+			err = c.cache.ZAdd(ctx, c.dataBuild(endData))
 			if err != nil {
 				global.Log.Warn(err.Error())
 			}
@@ -123,11 +123,11 @@ func (c *commentRepo) Get(ctx context.Context, id uint64) (domain.Comment, error
 		return domain.Comment{}, err
 	}
 	// 写入缓存
-	err = c.cache.Set(ctx, domain.Comment(daoComment))
+	err = c.cache.Set(ctx, c.dataBuild(daoComment))
 	if err != nil {
 		log.Warning(err.Error())
 	}
-	return domain.Comment(daoComment), nil
+	return c.dataBuild(daoComment), nil
 }
 
 func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
@@ -144,7 +144,7 @@ func (c *commentRepo) GetByArticleID(ctx context.Context, id uint64, paging *dom
 	comments := []domain.Comment{}
 	// 组装数据
 	for i, _ := range daoComments {
-		comments = append(comments, domain.Comment(daoComments[i]))
+		comments = append(comments, c.dataBuild(daoComments[i]))
 	}
 	// 写入缓存
 	err = c.cache.ZAdd(ctx, comments...)
@@ -162,7 +162,7 @@ func (c *commentRepo) GetByUserID(ctx context.Context, id uint64, paging *domain
 		return nil, err
 	}
 	for i, _ := range daoComments {
-		comments = append(comments, domain.Comment(daoComments[i]))
+		comments = append(comments, c.dataBuild(daoComments[i]))
 	}
 	return comments, nil
 }
@@ -182,5 +182,10 @@ func (c *commentRepo) dataBuild(comment model.Comment) domain.Comment {
 		State:     comment.State,
 		Ctime:     comment.Ctime,
 		Utime:     comment.Utime,
+		User: domain.User{
+			ID:       comment.UserID,
+			NickName: comment.User.NickName,
+			Avatar:   comment.User.Avatar,
+		},
 	}
 }
