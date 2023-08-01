@@ -8,6 +8,7 @@ import (
 	"xmlt/internal/model"
 	"xmlt/internal/repository/cache"
 	"xmlt/internal/repository/dao"
+	"xmlt/internal/shared"
 	"xmlt/utils"
 )
 
@@ -21,7 +22,7 @@ type ArticleRepo interface {
 	// 这里就会有一个很重要的概念，叫做延迟加载，但是 GO 是做不了的，
 	// 所以只能考虑传递标记位，或者使用新方法来控制要不要把 Author 组装起来
 	Get(ctx context.Context, id uint64) (domain.Article, error)
-	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *shared.Page) ([]domain.Article, error)
 }
 
 func NewArticleRepo(dao dao.ArticleDAO, artCache cache.ArticleCache) ArticleRepo {
@@ -41,7 +42,7 @@ func (a *articleRepo) Create(ctx context.Context, article domain.Article) (uint6
 		Content:      article.Content,
 		CommentCount: article.CommentCount,
 		Status:       article.Status,
-		Author:       article.Author,
+		UserID:       article.Author,
 		CategoryID:   article.CategoryID,
 		NiceTopic:    article.NiceTopic,
 		BrowseCount:  article.BrowseCount,
@@ -60,7 +61,7 @@ func (a *articleRepo) CreateAndCached(ctx context.Context, article domain.Articl
 		Content:      article.Content,
 		CommentCount: article.CommentCount,
 		Status:       article.Status,
-		Author:       article.Author,
+		UserID:       article.Author,
 		CategoryID:   article.CategoryID,
 		NiceTopic:    article.NiceTopic,
 		BrowseCount:  article.BrowseCount,
@@ -86,7 +87,7 @@ func (a *articleRepo) Update(ctx context.Context, article domain.Article) error 
 		Content:      article.Content,
 		CommentCount: article.CommentCount,
 		Status:       article.Status,
-		Author:       article.Author,
+		UserID:       article.Author,
 		CategoryID:   article.CategoryID,
 		NiceTopic:    article.NiceTopic,
 		BrowseCount:  article.BrowseCount,
@@ -114,7 +115,7 @@ func (a *articleRepo) Get(ctx context.Context, id uint64) (domain.Article, error
 		Content:      entity.Content,
 		CommentCount: entity.CommentCount,
 		Status:       entity.Status,
-		Author:       entity.Author,
+		Author:       entity.UserID,
 		CategoryID:   entity.CategoryID,
 		NiceTopic:    entity.NiceTopic,
 		BrowseCount:  entity.BrowseCount,
@@ -131,7 +132,7 @@ func (a *articleRepo) Get(ctx context.Context, id uint64) (domain.Article, error
 	return art, nil
 }
 
-func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error) {
+func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *shared.Page) ([]domain.Article, error) {
 	// 缓存未命中，执行数据库查询，并重新更新Redis
 	data, err := a.dao.GetArticlesByCategoryID(ctx, categoryID, paging)
 	if err != nil {
@@ -143,17 +144,47 @@ func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID ui
 		entity := domain.Article{
 			ID:          data[i].ID,
 			Title:       data[i].Title,
-			Author:      data[i].Author,
 			NiceTopic:   data[i].NiceTopic,
 			BrowseCount: data[i].BrowseCount,
-			User: domain.User{
-				ID:       data[i].User.ID,
-				NickName: data[i].User.NickName,
-				Avatar:   data[i].User.Avatar,
-			},
+
 			Ctime: time.UnixMilli(data[i].Ctime),
 		}
 		entities = append(entities, entity)
 	}
 	return entities, nil
+}
+
+func (a *articleRepo) dao2Dto(entity model.Article) domain.Article {
+	domainArticle := domain.Article{
+		ID:           entity.ID,
+		Title:        entity.Title,
+		Content:      entity.Content,
+		CommentCount: entity.CommentCount,
+		Status:       entity.Status,
+		CategoryID:   entity.CategoryID,
+		NiceTopic:    entity.NiceTopic,
+		BrowseCount:  entity.BrowseCount,
+		ThumbsUP:     entity.ThumbsUP,
+		Ctime:        time.UnixMilli(entity.Ctime),
+		Utime:        time.UnixMilli(entity.Utime),
+	}
+	// 将DAO对象的切片字段转换为Domain对象的切片字段
+	for _, commentDAO := range entity.Comments {
+		domainComment := domain.Comment{
+			ID:       commentDAO.ID,
+			Content:  commentDAO.Content,
+			UserID:   commentDAO.UserID,
+			ParentID: commentDAO.ParentID,
+			Floor:    commentDAO.Floor,
+		}
+		domainArticle.Comments = append(domainArticle.Comments, domainComment)
+	}
+	for _, likeDao := range entity.UserLikes {
+		domainUserLike := domain.UserLikeArticle{
+			ID:     likeDao.ID,
+			UserID: likeDao.UserID,
+		}
+		domainArticle.UserLikes = append(domainArticle.UserLikes, domainUserLike)
+	}
+	return domainArticle
 }
