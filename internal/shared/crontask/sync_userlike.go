@@ -30,9 +30,10 @@ type userLikeCron struct {
 
 // SyncFromRedisToMysql 触发条件：1.Redis内至少存在一条有关点赞的记录信息，否则不加载。
 func (u *userLikeCron) SyncFromRedisToMysql() {
+	// 初始化 context,保证任务集只存在一个context的链路完整性和单一性。
+	ctx := context.Background()
 	// 每 5 个小时从Redis同步到Mysql
 	u.schedule.Every(30).Second().Do(func() {
-		ctx := context.Background()
 		redisMarks, err := u.GetRedisMembers(ctx)
 		if err != nil {
 			global.Log.Warn(err.Error())
