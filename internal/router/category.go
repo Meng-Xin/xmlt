@@ -10,17 +10,19 @@ import (
 	"xmlt/internal/service"
 )
 
-type CategoryRouter struct{}
+type CategoryRouter struct {
+	service service.CategoryService
+}
 
-func (a *CategoryRouter) InitApiRouter(router *gin.RouterGroup) {
+func (c *CategoryRouter) InitApiRouter(router *gin.RouterGroup) {
 	categoryRouter := router.Group("category")
 	// 依赖注入
 	categoryDao := dao.NewCategoryDao(global.DB_MAKE)
 	categoryCache := cache.NewCategoryCache(global.Redis)
-	categoryService := service.NewCategoryService(
+	c.service = service.NewCategoryService(
 		repository.NewCategoryRepo(categoryDao, categoryCache),
 	)
-	categoryCtrl := v1.NewCategoryController(categoryService)
+	categoryCtrl := v1.NewCategoryController(c.service)
 	{
 		categoryRouter.POST("/create", categoryCtrl.CreateCategory)
 		categoryRouter.DELETE("/delete", categoryCtrl.DeleteCategory)

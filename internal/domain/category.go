@@ -6,6 +6,7 @@ type Category struct {
 	Description  string
 	ArticleCount uint64
 	State        bool
+	Articles     []Article
 	Ctime        int64
 	Utime        int64
 }

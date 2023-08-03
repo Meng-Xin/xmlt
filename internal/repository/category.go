@@ -7,6 +7,7 @@ import (
 	"xmlt/internal/model"
 	"xmlt/internal/repository/cache"
 	"xmlt/internal/repository/dao"
+	"xmlt/internal/shared"
 	"xmlt/internal/shared/e"
 	"xmlt/utils"
 )
@@ -16,6 +17,7 @@ type CategoryRepo interface {
 	Update(ctx context.Context, category domain.Category) error
 	Delete(ctx context.Context, categoryID uint64) error
 	GetCategoryList(ctx context.Context) ([]domain.Category, error)
+	GetArticleByCateId(ctx context.Context, cateId uint64, page *shared.Page) (domain.Category, error)
 }
 
 func NewCategoryRepo(dao dao.CategoryDao, cache cache.CategoryCache) CategoryRepo {
@@ -27,6 +29,15 @@ type categoryRepo struct {
 	cache cache.CategoryCache
 }
 
+func (c *categoryRepo) GetArticleByCateId(ctx context.Context, cateId uint64, page *shared.Page) (domain.Category, error) {
+	daoCate, err := c.dao.GetArticleByCateId(ctx, cateId, page)
+	if err != nil {
+		return domain.Category{}, err
+	}
+	domCate := c.dao2Dto(daoCate)
+	return domCate, nil
+}
+
 func (c *categoryRepo) Create(ctx context.Context, category domain.Category) (uint64, error) {
 	now := utils.GetTimeMilli()
 	entity := model.Category{
@@ -34,7 +45,7 @@ func (c *categoryRepo) Create(ctx context.Context, category domain.Category) (ui
 		Name:         category.Name,
 		Description:  category.Description,
 		ArticleCount: category.ArticleCount,
-		State:        true,
+		State:        1,
 		Ctime:        now,
 	}
 	return c.dao.Insert(ctx, entity)
@@ -95,7 +106,12 @@ func (c *categoryRepo) dao2Dto(entity model.Category) domain.Category {
 			CategoryID:   daoArticle.CategoryID,
 			NiceTopic:    daoArticle.NiceTopic,
 			BrowseCount:  daoArticle.BrowseCount,
-			ThumbsUP:     daoArticle.ThumbsUP,
+			User: domain.User{
+				ID:       daoArticle.User.ID,
+				NickName: daoArticle.User.NickName,
+				Avatar:   daoArticle.User.Avatar,
+			},
+			ThumbsUP: daoArticle.ThumbsUP,
 		}
 		domainCategory.Articles = append(domainCategory.Articles, domainArticle)
 	}

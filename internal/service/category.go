@@ -5,6 +5,7 @@ import (
 	"errors"
 	"xmlt/internal/domain"
 	"xmlt/internal/repository"
+	"xmlt/internal/shared"
 )
 
 type CategoryService interface {
@@ -12,6 +13,7 @@ type CategoryService interface {
 	UpdateCategory(ctx context.Context, category domain.Category) error
 	DeleteCategory(ctx context.Context, categoryID uint64) error
 	GetCategoryList(ctx context.Context) ([]domain.Category, error)
+	GetArticlesByCateId(ctx context.Context, cateId uint64, page *shared.Page) (domain.Category, error)
 }
 
 func NewCategoryService(repo repository.CategoryRepo) CategoryService {
@@ -20,6 +22,10 @@ func NewCategoryService(repo repository.CategoryRepo) CategoryService {
 
 type categoryService struct {
 	repo repository.CategoryRepo
+}
+
+func (c *categoryService) GetArticlesByCateId(ctx context.Context, cateId uint64, page *shared.Page) (domain.Category, error) {
+	return c.repo.GetArticleByCateId(ctx, cateId, page)
 }
 
 func (c *categoryService) CreateCategory(ctx context.Context, category domain.Category) (uint64, error) {

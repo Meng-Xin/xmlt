@@ -2,11 +2,14 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/public"
 )
 
 type CategoryController struct {
@@ -60,6 +63,24 @@ func (c *CategoryController) DeleteCategory(ctx *gin.Context) {
 }
 
 func (c *CategoryController) GetCategoryList(ctx *gin.Context) {
+	code := e.SUCCESS
+	cateId, _ := strconv.ParseUint(ctx.Query("category_id"), 10, 64)
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	pageSize, _ := strconv.Atoi(ctx.Query("page_size"))
+	newPage := shared.NewPage(page, pageSize)
+	cateArts, err := c.service.GetArticlesByCateId(ctx.Request.Context(), cateId, newPage)
+	if err != nil {
+		code = e.ERROR
+		ctx.JSON(http.StatusOK, public.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, public.Response{
+		Status: code,
+		Data:   cateArts.Articles,
+	})
 
 }
 

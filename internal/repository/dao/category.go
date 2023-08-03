@@ -4,6 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"xmlt/internal/model"
+	"xmlt/internal/shared"
 )
 
 type CategoryDao interface {
@@ -11,6 +12,7 @@ type CategoryDao interface {
 	Update(ctx context.Context, category model.Category) error
 	Delete(ctx context.Context, categoryID uint64) error
 	GetCategoryList(ctx context.Context) ([]model.Category, error)
+	GetArticleByCateId(ctx context.Context, cateID uint64, page *shared.Page) (model.Category, error)
 }
 
 func NewCategoryDao(db *gorm.DB) CategoryDao {
@@ -19,6 +21,12 @@ func NewCategoryDao(db *gorm.DB) CategoryDao {
 
 type categoryGorm struct {
 	db *gorm.DB
+}
+
+func (c *categoryGorm) GetArticleByCateId(ctx context.Context, cateID uint64, page *shared.Page) (model.Category, error) {
+	var category model.Category
+	err := c.db.WithContext(ctx).Preload("Articles.User").Scopes(page.Paginate(&model.Article{})).Where("id=?", cateID).First(&category).Error
+	return category, err
 }
 
 func (c *categoryGorm) Insert(ctx context.Context, category model.Category) (uint64, error) {
