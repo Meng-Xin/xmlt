@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
+	"xmlt/internal/shared/public"
 )
 
 type ArticleController struct {
@@ -51,7 +52,7 @@ func (a *ArticleController) GetArticleByCate(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.Query("page"))
 	pageSize, _ := strconv.Atoi(ctx.Query("page_size"))
 
-	pageEntity := domain.NewPage(page, pageSize)
+	pageEntity := shared.NewPage(page, pageSize)
 	arts, err := a.service.GetCategoryArticles(ctx.Request.Context(), category, pageEntity)
 	if err != nil {
 		// TODO 如果代码严谨的话，这边要区别是真的没有数据，还是服务器出现了异常
@@ -175,6 +176,6 @@ func (a *ArticleSave) init(art domain.Article) {
 }
 
 type ArticleListResponse struct {
-	PageInfo *domain.Page  // 分页信息
+	PageInfo *shared.Page  // 分页信息
 	Articles []ArticleSave // 文章列表
 }

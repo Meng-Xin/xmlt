@@ -139,16 +139,9 @@ func (a *articleRepo) GetArticlesByCategoryID(ctx context.Context, categoryID ui
 		return nil, err
 	}
 	var entities []domain.Article
-	for i, _ := range data {
+	for _, val := range data {
 		// 按道理来说这里需要提前组装好 Author的
-		entity := domain.Article{
-			ID:          data[i].ID,
-			Title:       data[i].Title,
-			NiceTopic:   data[i].NiceTopic,
-			BrowseCount: data[i].BrowseCount,
-
-			Ctime: time.UnixMilli(data[i].Ctime),
-		}
+		entity := a.dao2Dto(val)
 		entities = append(entities, entity)
 	}
 	return entities, nil
@@ -165,8 +158,13 @@ func (a *articleRepo) dao2Dto(entity model.Article) domain.Article {
 		NiceTopic:    entity.NiceTopic,
 		BrowseCount:  entity.BrowseCount,
 		ThumbsUP:     entity.ThumbsUP,
-		Ctime:        time.UnixMilli(entity.Ctime),
-		Utime:        time.UnixMilli(entity.Utime),
+		User: domain.User{
+			ID:       entity.User.ID,
+			NickName: entity.User.NickName,
+			Avatar:   entity.User.Avatar,
+		},
+		Ctime: time.UnixMilli(entity.Ctime),
+		Utime: time.UnixMilli(entity.Utime),
 	}
 	// 将DAO对象的切片字段转换为Domain对象的切片字段
 	for _, commentDAO := range entity.Comments {

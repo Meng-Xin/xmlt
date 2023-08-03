@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
 	"xmlt/internal/repository"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
 )
 
 type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (uint64, error)
 	Publish(ctx context.Context, article domain.Article) error
 	Get(ctx context.Context, id uint64, source int) (domain.Article, error)
-	GetCategoryArticles(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error)
+	GetCategoryArticles(ctx context.Context, categoryID uint64, paging *shared.Page) ([]domain.Article, error)
 }
 
 type articleService struct {
@@ -27,7 +28,7 @@ func NewArticleService(bRepo repository.ArticleRepo, cRepo repository.ArticleRep
 	}
 }
 
-func (a *articleService) GetCategoryArticles(ctx context.Context, categoryID uint64, paging *domain.Page) ([]domain.Article, error) {
+func (a *articleService) GetCategoryArticles(ctx context.Context, categoryID uint64, paging *shared.Page) ([]domain.Article, error) {
 	if categoryID == 0 {
 		return nil, errors.New("不存在该主题")
 	}

@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm"
 	"time"
 	"xmlt/global"
-	"xmlt/internal/domain"
 	"xmlt/internal/model"
+	"xmlt/internal/shared"
 	"xmlt/utils"
 )
 
@@ -18,7 +18,7 @@ type ArticleDAO interface {
 	Insert(ctx context.Context, article model.Article) (uint64, error)
 	Update(ctx context.Context, article model.Article) error
 	GetByID(ctx context.Context, id uint64) (model.Article, error)
-	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *domain.Page) ([]model.Article, error)
+	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *shared.Page) ([]model.Article, error)
 }
 
 func NewArticleDAO(db *gorm.DB) ArticleDAO {
@@ -67,7 +67,7 @@ func AfterCreate(db *gorm.DB) error {
 	return nil
 }
 
-func (a *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, page *domain.Page) ([]model.Article, error) {
+func (a *articleGORM) GetArticlesByCategoryID(ctx context.Context, categoryID uint64, page *shared.Page) ([]model.Article, error) {
 	var articles []model.Article
 	// 插入分页构造
 	err := a.db.WithContext(ctx).Preload("User").Scopes(page.Paginate(&model.Article{})).Where("category_id=?", categoryID).Find(&articles).Error
