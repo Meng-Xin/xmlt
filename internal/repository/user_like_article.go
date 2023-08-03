@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"xmlt/internal/expand/e"
 	"xmlt/internal/repository/cache"
+	"xmlt/internal/shared/e"
 )
 
 type UserLikeArticleRepo interface {

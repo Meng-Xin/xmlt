@@ -10,17 +10,19 @@ import (
 	"xmlt/middle"
 )
 
-type UserLikeArticleRouter struct{}
+type UserLikeArticleRouter struct {
+	service service.UserLikeArticleService
+}
 
-func (a *UserLikeArticleRouter) InitApiRouter(router *gin.RouterGroup) {
+func (u *UserLikeArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	userLikeArtRouter := router.Group("userLikeArticle")
 	userLikeArtRouter.Use(middle.VerifyJWTMiddleware())
 	// 依赖注入
 	userLikeArtCache := cache.NewUserLikeArticleCache(global.Redis)
-	userService := service.NewUserLikeArticleService(
+	u.service = service.NewUserLikeArticleService(
 		repository.NewUserLikeArticleRepo(userLikeArtCache),
 	)
-	userLikeCtrl := v1.NewUserLikeArticleController(userService)
+	userLikeCtrl := v1.NewUserLikeArticleController(u.service)
 	{
 		userLikeArtRouter.POST("/likeOrCancelLike", userLikeCtrl.LikeOrCancelLike)
 		userLikeArtRouter.POST("/getUserLikeState", userLikeCtrl.GetLikeState)

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 	"xmlt/global"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
+	"xmlt/internal/shared/public"
 )
 
 type UserLikeArticleController struct {

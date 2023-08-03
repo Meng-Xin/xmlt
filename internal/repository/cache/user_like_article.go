@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"strconv"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
 	"xmlt/utils"
 )
 
