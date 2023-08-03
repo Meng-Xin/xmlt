@@ -94,7 +94,6 @@ func Migration(db *gorm.DB) {
 		model.Category{},
 		model.Comment{},
 		model.Notification{},
-		model.Thumbs{},
 	)
 	log.Info("register table success")
 }
