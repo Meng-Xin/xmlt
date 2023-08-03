@@ -2,13 +2,13 @@ package middle
 
 import (
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 	"net/http"
-	"xmlt/global"
 )
 
-func BucketRateLimiter() gin.HandlerFunc {
+func BucketRateLimiter(rate *rate.Limiter) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if global.TokenBucket.Allow() {
+		if rate.Allow() {
 			ctx.Next()
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
