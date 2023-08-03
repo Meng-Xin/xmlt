@@ -6,6 +6,7 @@ type RouteGroup struct {
 	UserLikeArticleRouter
 	CommentRouter
 	CategoryRouter
+	HomeRouter
 }
 
 var RouterGroupCtrl = new(RouteGroup)

@@ -12,4 +12,5 @@ var (
 	UpdateCommentIdentityError  = errors.New("更新评论状态身份错误！")
 	PagingMaxLimitError         = errors.New("分页获取超过限制")
 	PagingIsNullError           = errors.New("分页获取超过限制")
+	NotFoundUserLikeArticle     = errors.New("未找到用户点赞记录")
 )
