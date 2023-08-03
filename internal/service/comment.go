@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
 	"xmlt/internal/repository"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
 )
 
 type CommentService interface {
@@ -13,11 +14,11 @@ type CommentService interface {
 	// DeleteComment 删除评论 (修改评论状态)
 	DeleteComment(ctx context.Context, comment domain.Comment) error
 	// GetArtComment 获取帖子评论
-	GetArtComment(ctx context.Context, articleID uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error)
+	GetArtComment(ctx context.Context, articleID uint64, paging *shared.Page, by shared.RangeBy) ([]domain.Comment, error)
 	// GetReplyComment 获取回复评论
 	GetReplyComment(ctx context.Context, commentID uint64) (domain.Comment, error)
 	// GetUserComment 获取用户评论
-	GetUserComment(ctx context.Context, userID uint64, paging *domain.Page) ([]domain.Comment, error)
+	GetUserComment(ctx context.Context, userID uint64, paging *shared.Page) ([]domain.Comment, error)
 }
 
 type commentService struct {
@@ -43,7 +44,7 @@ func (c *commentService) DeleteComment(ctx context.Context, comment domain.Comme
 	return c.repo.Update(ctx, comment)
 }
 
-func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, paging *domain.Page, by domain.RangeBy) ([]domain.Comment, error) {
+func (c *commentService) GetArtComment(ctx context.Context, articleID uint64, paging *shared.Page, by shared.RangeBy) ([]domain.Comment, error) {
 	// 获取评论信息
 	return c.repo.GetByArticleID(ctx, articleID, paging, by)
 }
@@ -52,7 +53,7 @@ func (c *commentService) GetReplyComment(ctx context.Context, commentID uint64) 
 	return c.repo.Get(ctx, commentID)
 }
 
-func (c *commentService) GetUserComment(ctx context.Context, userID uint64, paging *domain.Page) ([]domain.Comment, error) {
+func (c *commentService) GetUserComment(ctx context.Context, userID uint64, paging *shared.Page) ([]domain.Comment, error) {
 	return c.repo.GetByUserID(ctx, userID, paging)
 }
 

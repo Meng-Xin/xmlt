@@ -8,7 +8,6 @@ type Comment struct {
 	ParentID  uint64 // 父级评论ID
 	Floor     uint32 // 评论楼层
 	State     uint8  // 该评论状态 0:正常，1：删除
-	User      User   // 连接查询直接附带出来数据
 	Ctime     int64  // 创建时间，毫秒作为单位
 	Utime     int64  // 更新时间，毫秒作为单位
 }

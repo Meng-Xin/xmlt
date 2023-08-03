@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
+	"xmlt/internal/shared/public"
 )
 
 type CommentController struct {
@@ -55,8 +56,8 @@ func (c *CommentController) GetArtComment(ctx *gin.Context) {
 	pageSize, _ := strconv.Atoi(ctx.Query("page_size"))
 	articleId, _ := strconv.ParseUint(ctx.Query("article_id"), 10, 64)
 
-	pageInfo := domain.NewPage(page, pageSize)
-	rangeBy := domain.NewRange(pageInfo)
+	pageInfo := shared.NewPage(page, pageSize)
+	rangeBy := shared.NewRange(pageInfo)
 	artComment, err := c.service.GetArtComment(ctx.Request.Context(), articleId, pageInfo, *rangeBy)
 	if err != nil {
 		return

@@ -8,8 +8,9 @@ import (
 	"github.com/go-redis/redis"
 	"time"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
 	"xmlt/utils"
 )
 
@@ -17,7 +18,7 @@ type CommentCache interface {
 	Set(ctx context.Context, comment domain.Comment) error
 	Get(ctx context.Context, cid uint64) (domain.Comment, error)
 	ZAdd(ctx context.Context, comment ...domain.Comment) error
-	ZGet(ctx context.Context, cid uint64, by domain.RangeBy) ([]domain.Comment, error)
+	ZGet(ctx context.Context, cid uint64, by shared.RangeBy) ([]domain.Comment, error)
 }
 
 type commentRedisCache struct {
@@ -44,7 +45,7 @@ func (c *commentRedisCache) ZAdd(ctx context.Context, comments ...domain.Comment
 	return err
 }
 
-func (c *commentRedisCache) ZGet(ctx context.Context, articleID uint64, by domain.RangeBy) ([]domain.Comment, error) {
+func (c *commentRedisCache) ZGet(ctx context.Context, articleID uint64, by shared.RangeBy) ([]domain.Comment, error) {
 	var comments []domain.Comment
 	var result []string
 	var err error
