@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/enum"
-	"xmlt/internal/expand/public"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/enum"
+	"xmlt/internal/shared/public"
 	"xmlt/utils"
 )
 

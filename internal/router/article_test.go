@@ -12,9 +12,9 @@ import (
 	"time"
 	"xmlt/internal/api/v1"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/enum"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared/enum"
+	"xmlt/internal/shared/public"
 )
 
 func TestArticleController_GetByID(t *testing.T) {

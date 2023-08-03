@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/public"
 )
 
 // HomeController Home页面横跨了多个领域，因此它是 Service 层级的调动者
@@ -49,7 +50,7 @@ func (h *HomeController) GetHomeInfo(ctx *gin.Context) {
 	}
 	var artsVo []articleHome
 	// 获取首页文章列表
-	articles, err := h.ArticleService.GetCategoryArticles(ctx, firstCate.ID, domain.NewPage(1, 1))
+	articles, err := h.ArticleService.GetCategoryArticles(ctx, firstCate.ID, shared.NewPage(1, 1))
 	if err != nil {
 		code = e.ERROR
 		ctx.JSON(http.StatusOK, public.Response{
