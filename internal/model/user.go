@@ -9,6 +9,8 @@ type User struct {
 	Phone    string `gorm:"size:11"`  // 手机号
 	Avatar   string // 头像
 
-	Ctime int64 // 创建时间，毫秒作为单位
-	Utime int64 // 更新时间，毫秒作为单位
+	Comments     []Comment         `gorm:"foreignKey:UserID;references:ID;"` // User : Comment -> 1 : N
+	LikeArticles []UserLikeArticle `gorm:"foreignKey:UserID;references:ID;"` // User : LikeArt -> 1 : N
+	Ctime        int64             // 创建时间，毫秒作为单位
+	Utime        int64             // 更新时间，毫秒作为单位
 }

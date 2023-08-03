@@ -7,7 +7,7 @@ import (
 	"github.com/go-redis/redis"
 	"time"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
+	"xmlt/internal/shared/e"
 	"xmlt/utils"
 )
 

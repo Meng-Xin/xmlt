@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"xmlt/global"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
-	"xmlt/internal/expand/public"
 	"xmlt/internal/service"
+	"xmlt/internal/shared/e"
+	"xmlt/internal/shared/public"
 )
 
 type UserController struct {

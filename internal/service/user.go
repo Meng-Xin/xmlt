@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"xmlt/internal/domain"
-	"xmlt/internal/expand/e"
 	"xmlt/internal/repository"
+	"xmlt/internal/shared/e"
 	"xmlt/utils"
 )
 

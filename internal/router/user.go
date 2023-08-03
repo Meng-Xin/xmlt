@@ -10,17 +10,19 @@ import (
 	"xmlt/internal/service"
 )
 
-type UserRouter struct{}
+type UserRouter struct {
+	service service.UserService
+}
 
-func (a *UserRouter) InitApiRouter(router *gin.RouterGroup) {
+func (u *UserRouter) InitApiRouter(router *gin.RouterGroup) {
 	userRouter := router.Group("user")
 	// 依赖注入
 	userCache := cache.NewUserRedisCache(global.Redis)
 	userDao := dao.NewUserDao(global.DB_MAKE)
-	userService := service.NewUserService(
+	u.service = service.NewUserService(
 		repository.NewUserRepo(userDao, userCache),
 	)
-	userCtrl := v1.NewUserController(userService)
+	userCtrl := v1.NewUserController(u.service)
 	{
 		userRouter.POST("/login", userCtrl.Login)
 		userRouter.POST("/register", userCtrl.Register)
