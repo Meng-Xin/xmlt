@@ -50,6 +50,8 @@ func NewRouter() *gin.Engine {
 		allRouter.UserLikeArticleRouter.InitApiRouter(v1)
 		// Comment 评论
 		allRouter.CommentRouter.InitApiRouter(v1)
+		// Home 首页
+		allRouter.HomeRouter.InitApiRouter(v1, allRouter)
 	}
 
 	return r
