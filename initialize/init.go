@@ -1,6 +1,8 @@
 package initialize
 
 import (
+	"github.com/go-co-op/gocron"
+	"time"
 	"xmlt/config"
 	"xmlt/global"
 	"xmlt/utils"
@@ -17,4 +19,7 @@ func GlobalInit() {
 	InitRedis()
 	// RabbitMQ初始化
 	global.RabbitMQ = utils.NewRabbitMQ("comment", "", "", "amqp://guest:guest@localhost:5672/")
+	// Cron 定时组件初始化
+	global.Cron = gocron.NewScheduler(time.UTC)
+
 }
