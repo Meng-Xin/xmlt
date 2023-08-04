@@ -39,43 +39,46 @@ type commentRepo struct {
 
 func (c *commentRepo) ConsumerMQ(ctx context.Context) error {
 	// 从消息队列获取
-	msgs, err := global.RabbitMQ.Ch.Consume(global.RabbitMQ.QueueName, "评论消费", true, false, false, false, nil)
+	msgs, err := global.RabbitMQ.Ch.Consume(global.RabbitMQ.QueueName, "评论消费", false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
-	go func() error {
+
+	go func() {
 		var endData model.Comment
-		defer func() {
-			// 未能正常消费信息捕获，放入死信队列。
-			if err := recover(); err != nil {
-				global.Log.Error("消息队列存在无法正常消费数据：", err)
-				// TODO 把本次数据信息丢入死信队列！
-				global.Log.Info("死信：", endData)
-			}
-		}()
 		for msg := range msgs {
 			endData = model.Comment{}
-			err = json.Unmarshal(msg.Body, &endData)
-			if err != nil {
-				return err
+			if err := json.Unmarshal(msg.Body, &endData); err != nil {
+				global.Log.Warn("评论消费失败：", err.Error())
+				msg.Ack(false)
+				continue
 			}
+
+			// 获取最新楼层
 			floor, err := c.GetLatestFloor(ctx, endData.ArticleID)
 			if err != nil && err != gorm.ErrRecordNotFound {
-				panic(err)
+				global.Log.Warn("评论消费失败：", err.Error())
+				msg.Ack(false)
+				continue
 			}
 			endData.Floor = floor + 1
-			_, err = c.dao.Insert(ctx, endData)
-			if err != nil {
-				panic(err)
+
+			// 写入数据库
+			if _, err := c.dao.Insert(ctx, endData); err != nil {
+				global.Log.Warn("评论消费失败：", err.Error())
+				msg.Ack(false)
+				continue
 			}
-			// 写入缓存
+
+			// 写入缓存,这里触发的错误可以容忍。
 			err = c.cache.Set(ctx, c.dataBuild(endData))
 			err = c.cache.ZAdd(ctx, c.dataBuild(endData))
 			if err != nil {
-				global.Log.Warn(err.Error())
+				global.Log.Info("评论消费成功：但是写入缓存失败")
 			}
+			// 最终确认消息消费完毕
+			msg.Ack(true)
 		}
-		return err
 	}()
 	return err
 }
