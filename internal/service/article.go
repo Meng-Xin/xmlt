@@ -17,13 +17,11 @@ type ArticleService interface {
 }
 
 type articleService struct {
-	bRepo repository.ArticleRepo // 线上库
 	cRepo repository.ArticleRepo // 作者库
 }
 
-func NewArticleService(bRepo repository.ArticleRepo, cRepo repository.ArticleRepo) ArticleService {
+func NewArticleService(cRepo repository.ArticleRepo) ArticleService {
 	return &articleService{
-		bRepo: bRepo,
 		cRepo: cRepo,
 	}
 }
@@ -58,7 +56,7 @@ func (a *articleService) Save(ctx context.Context, article domain.Article) (uint
 
 }
 
-// Publish B 端 作者进行推送文章
+// Publish 作者进行推送文章
 func (a *articleService) Publish(ctx context.Context, article domain.Article) error {
 	// 先保存作者库，在推送到线上库
 	id, err := a.Save(ctx, article)
@@ -66,16 +64,11 @@ func (a *articleService) Publish(ctx context.Context, article domain.Article) er
 		return err
 	}
 	article.ID = id
-	// 同步给线上库，因为是不同的数据库无法使用事务，
-	// 只能考虑重试 + 监控 + 告警
-	_, err = a.bRepo.CreateAndCached(ctx, article)
+	// TODO 把这条消息推送到待审核文章
 	return err
 }
 
-// Get Source：0-线上库 1-制作库
+// Get Source：
 func (a *articleService) Get(ctx context.Context, id uint64, source int) (domain.Article, error) {
-	if source == 0 {
-		return a.bRepo.Get(ctx, id)
-	}
 	return a.cRepo.Get(ctx, id)
 }

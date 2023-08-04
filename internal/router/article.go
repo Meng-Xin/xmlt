@@ -21,8 +21,7 @@ func (a *ArticleRouter) InitApiRouter(router *gin.RouterGroup) {
 	// 依赖注入
 	artCache := cache.NewArticleRedisCache(global.Redis)
 	a.service = service.NewArticleService(
-		repository.NewArticleRepo(dao.NewArticleDAO(global.DB_ONLINE), artCache), // 加载线上库 - 用户
-		repository.NewArticleRepo(dao.NewArticleDAO(global.DB_MAKE), artCache),   // 加载制作库 - 作者
+		repository.NewArticleRepo(dao.NewArticleDAO(global.DB_MAKE), artCache), // 加载制作库 - 作者
 	)
 	articleCtl := v1.NewArticleController(a.service)
 	{

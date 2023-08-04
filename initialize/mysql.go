@@ -47,39 +47,12 @@ func InitDatabase(makeDSN string, onlineDSN string) {
 	// 中间件引入
 	SlowQueryLog(dbMake)
 	GormRateLimiter(dbMake, rate.NewLimiter(500, 1000))
-
-	dbOnline, err := gorm.Open(mysql.New(mysql.Config{
-		DSN:                       onlineDSN, // DSN data source name
-		DefaultStringSize:         256,       // string 类型字段的默认长度
-		DisableDatetimePrecision:  true,      // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
-		DontSupportRenameIndex:    true,      // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
-		DontSupportRenameColumn:   true,      // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
-		SkipInitializeWithVersion: false,     // 根据版本自动配置
-	}), &gorm.Config{
-		Logger: ormLogger,
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
-	})
-	onlineDB, _ := dbOnline.DB()
-	onlineDB.SetMaxIdleConns(20)  //设置连接池，空闲
-	onlineDB.SetMaxOpenConns(100) //打开
-	onlineDB.SetConnMaxLifetime(time.Second * 30)
-
-	// 中间件引入
-	SlowQueryLog(dbMake)
-	GormRateLimiter(dbOnline, rate.NewLimiter(500, 1000))
-
 	if err != nil {
 		panic(err)
 	}
 	global.DB_MAKE = dbMake
-	global.DB_ONLINE = dbOnline
 	if global.Config.MysqlMake.AutoMigrate {
 		Migration(global.DB_MAKE)
-	}
-	if global.Config.MysqlOnline.AutoMigrate {
-		Migration(global.DB_ONLINE)
 	}
 }
 
