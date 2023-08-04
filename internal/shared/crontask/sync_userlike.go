@@ -45,6 +45,7 @@ func (u *userLikeCron) SyncFromRedisToMysql() {
 			mysqlUsers, err := u.GetMysqlMembers(ctx, artId)
 			if err != nil {
 				global.Log.Warn(err.Error())
+				continue
 			}
 			for i, _ := range val {
 				// 获取完整uid列表
@@ -61,6 +62,7 @@ func (u *userLikeCron) SyncFromRedisToMysql() {
 				err = u.UpdateUserLikeState(ctx, artId, uid, likeInfo[uid])
 				if err != nil {
 					log.Warn(err.Error())
+					continue
 				}
 			}
 			// comparedRefRedis 差集补充用户点赞信息
@@ -68,6 +70,7 @@ func (u *userLikeCron) SyncFromRedisToMysql() {
 				err = u.CreateUserLikeState(ctx, artId, uid, likeInfo[uid])
 				if err != nil {
 					log.Warn(err.Error())
+					continue
 				}
 			}
 		}
