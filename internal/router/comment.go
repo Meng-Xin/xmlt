@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"xmlt/global"
 	v1 "xmlt/internal/api/v1"
 	"xmlt/internal/repository"
@@ -33,7 +32,7 @@ func (c *CommentRouter) InitApiRouter(router *gin.RouterGroup) {
 	err := commentRepo.ConsumerMQ(context.Background())
 
 	if err != nil {
-		log.Error(err.Error())
+		global.Log.Error(err.Error())
 	}
 	commentCtrl := v1.NewCommentCtrl(c.service)
 	{
