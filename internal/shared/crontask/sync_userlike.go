@@ -33,7 +33,7 @@ func (u *userLikeCron) SyncFromRedisToMysql() {
 	// 初始化 context,保证任务集只存在一个context的链路完整性和单一性。
 	ctx := context.Background()
 	// 每 5 个小时从Redis同步到Mysql
-	u.schedule.Every(30).Second().Do(func() {
+	u.schedule.Every(5).Hour().Do(func() {
 		redisMarks, err := u.GetRedisMembers(ctx)
 		if err != nil {
 			global.Log.Warn(err.Error())
@@ -131,6 +131,7 @@ func (u *userLikeCron) GetMysqlMembers(ctx context.Context, artId uint64) ([]uin
 	return mysqlMark, nil
 }
 
+// UpdateUserLikeState 更新用户点赞状态
 func (u *userLikeCron) UpdateUserLikeState(ctx context.Context, artId, uid uint64, timer uint64) error {
 	err := u.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		err := tx.WithContext(ctx).Where("article_id=? and user_id=?", artId, uid).Updates(&model.UserLikeArticle{LikeState: false, Utime: timer}).Error
@@ -140,6 +141,7 @@ func (u *userLikeCron) UpdateUserLikeState(ctx context.Context, artId, uid uint6
 	return err
 }
 
+// CreateUserLikeState 创建用户点赞信息
 func (u *userLikeCron) CreateUserLikeState(ctx context.Context, artId, uid uint64, timer uint64) error {
 	entity := model.UserLikeArticle{
 		ArticleID: artId,
