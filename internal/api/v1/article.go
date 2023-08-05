@@ -146,10 +146,7 @@ type ArticleSave struct {
 	BrowseCount uint64 `json:"browseCount" from:"browseCount"`                  // 浏览量
 	ThumbsUP    uint64 `json:"thumbsUP" form:"thumbsUP"`                        // 点赞数
 	Author      uint64 // 作者
-	// 一般来说，考虑到各种 APP 发版本不容易，
-	// 所以数字、货币、日期、国际化之类的都是后端做的
-	// 前端就是无脑展示
-	UserInfo struct {
+	UserInfo    struct {
 		ID       uint64
 		NickName string
 		Avatar   string
