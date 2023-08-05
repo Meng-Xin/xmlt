@@ -11,9 +11,9 @@ import (
 func SendMail(mailTo []string, subject string, body string) error {
 	// 设置邮箱主体
 	mailConn := map[string]string{
-		"user": "997266754@qq.com", //发送人邮箱（邮箱以自己的为准）
-		"pass": "biqsxzeibmmjbcfi", //发送人邮箱的密码，现在可能会需要邮箱 开启授权密码后在pass填写授权码
-		"host": "smtp.qq.com",      //邮箱服务器（此时用的是qq邮箱）
+		"user": "***@qq.com",  //发送人邮箱（邮箱以自己的为准）
+		"pass": "****",        //发送人邮箱的密码，现在可能会需要邮箱 开启授权密码后在pass填写授权码
+		"host": "smtp.qq.com", //邮箱服务器（此时用的是qq邮箱）
 	}
 
 	m := gomail.NewMessage(
