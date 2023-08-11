@@ -93,3 +93,57 @@ type category struct {
 	Ctime        int64  `json:"ctime"`
 	Utime        int64  `json:"utime"`
 }
+
+type CategoryInfo struct {
+	Name        string
+	Description string
+	Articles    ArticlesRes
+}
+
+type CreateCategoryReq struct {
+	Name        string `json:"name" form:"name"`
+	Description string `json:"description" from:"description"`
+}
+
+type UpdateCategoryReq struct {
+	Name        string `json:"name" form:"name"`
+	Description string `json:"description" from:"description"`
+}
+
+type CreateCategoryRes struct {
+	CategoryId uint64
+}
+
+func (c *CreateCategoryRes) init(cateId uint64) {
+	c.CategoryId = cateId
+}
+
+type UpdateCategoryRes struct {
+	CategoryId uint64
+}
+
+func (u *UpdateCategoryRes) init(cateId uint64) {
+	u.CategoryId = cateId
+}
+
+type DeleteCategoryRes struct {
+	CategoryId uint64
+}
+
+func (d *DeleteCategoryRes) init(cateId uint64) {
+	d.CategoryId = cateId
+}
+
+type GetCategoriesRes struct {
+	CateList []CategoryInfo
+}
+
+func (g *GetCategoriesRes) init(cates []domain.Category) {
+	for _, cate := range cates {
+		var cateInfo CategoryInfo
+		cateInfo.Name = cate.Name
+		cateInfo.Description = cate.Description
+		cateInfo.Articles.init(cate.Articles, nil)
+		g.CateList = append(g.CateList)
+	}
+}

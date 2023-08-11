@@ -11,7 +11,7 @@ import (
 
 type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (uint64, error)
-	Publish(ctx context.Context, article domain.Article) error
+	Publish(ctx context.Context, artId, uid uint64) (uint64, error)
 	Get(ctx context.Context, id uint64, source int) (domain.Article, error)
 	GetCategoryArticles(ctx context.Context, categoryID uint64, paging *shared.Page) ([]domain.Article, error)
 }
@@ -57,15 +57,21 @@ func (a *articleService) Save(ctx context.Context, article domain.Article) (uint
 }
 
 // Publish 作者进行推送文章
-func (a *articleService) Publish(ctx context.Context, article domain.Article) error {
-	// 先保存作者库，在推送到线上库
-	id, err := a.Save(ctx, article)
+func (a *articleService) Publish(ctx context.Context, artId, uid uint64) (uint64, error) {
+	// TODO 把本文章的状态更改为待审核
+	// 校验发布用户和文章用户是否一致
+	daoArt, err := a.cRepo.Get(ctx, artId)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	article.ID = id
-	// TODO 把这条消息推送到待审核文章
-	return err
+	if daoArt.Author != uid {
+		return 0, errors.New("发布失败：发布用户和文章作者Id不一致！")
+	}
+	publishId, err := a.cRepo.UpdateToPublish(ctx, artId)
+	if err != nil {
+		return 0, err
+	}
+	return publishId, nil
 }
 
 // Get Source：

@@ -50,6 +50,7 @@ func (c *CommentController) Create(ctx *gin.Context) {
 func (c *CommentController) Delete(ctx *gin.Context) {
 
 }
+
 func (c *CommentController) GetArtComment(ctx *gin.Context) {
 	code := e.SUCCESS
 	page, _ := strconv.Atoi(ctx.Query("page"))
@@ -67,6 +68,7 @@ func (c *CommentController) GetArtComment(ctx *gin.Context) {
 		Data:   artComment,
 	})
 }
+
 func (c *CommentController) GetByUserID(ctx *gin.Context) {
 
 }
@@ -82,4 +84,28 @@ type comment struct {
 
 	Ctime int64 `json:"ctime"` // 创建时间，毫秒作为单位
 	Utime int64 `json:"utime"` // 更新时间，毫秒作为单位
+}
+
+type CreateCommentReq struct {
+	Content   string `json:"content" form:"content"`   // 评论内容
+	ArticleID uint64 `json:"articleID" form:"comment"` // 文章ID
+	ParentID  uint64 `json:"parent_id" form:"comment"` // 父级评论ID
+}
+
+type GetArtCommentRes struct {
+	ID      uint64   // 评论ID
+	Content string   // 评论内容
+	User    struct { // 评论用户
+		Uid      uint64
+		NickName string
+		Avatar   string
+	}
+	ArticleID struct { // 评论文章
+		ArtId uint64
+		Title string
+	}
+	ParentComment struct { // 父级评论信息
+		ParentId uint64
+		Content  string
+	}
 }

@@ -6,7 +6,7 @@ type Article struct {
 	Title        string `gorm:"size:50;comment:帖子标题"`
 	Content      string `gorm:"type:longtext;comment:帖子内容"`
 	CommentCount uint64 `gorm:"comment:评论总数"`
-	Status       uint8  `gorm:"comment:帖子状态 0:审核、1:正常、2:删除"`
+	Status       uint8  `gorm:"comment:帖子状态 0:保存、1:待审、2:审核通过、3:删除"`
 	UserID       uint64 `gorm:"comment:作者ID"`
 	CategoryID   uint64 `gorm:"comment:所属板块ID"`
 	NiceTopic    uint8  `gorm:"comment:精选话题"`
@@ -15,7 +15,7 @@ type Article struct {
 
 	Comments  []Comment         `gorm:"foreignKey:ArticleID;references:ID;"` // Article : Comment -> 1:N
 	UserLikes []UserLikeArticle `gorm:"foreignKey:ArticleID;references:ID;"` // Article : Comment -> 1:N
-	Tags      []Tag             `gorm:"many2many:article_tag"`               // Tag : Article -> N:N
+	Tags      []Tag             `gorm:"many2many:article_tag"`               // Tag : Article -> N:N 暂时未使用
 
 	// 预加载模型
 	User User

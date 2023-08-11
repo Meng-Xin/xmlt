@@ -13,10 +13,18 @@ import (
 	"xmlt/utils"
 )
 
+const (
+	saveArticleState    = 0
+	pendingArticleState = 1
+	passArticleState    = 2
+	deleteArticleState  = 3
+)
+
 type ArticleDAO interface {
 	// Insert 的概念更加贴近关系型数据库，所以这里就不再是用 CREATE 这种说法了
 	Insert(ctx context.Context, article model.Article) (uint64, error)
 	Update(ctx context.Context, article model.Article) error
+	UpdateToPublish(ctx context.Context, id uint64) (uint64, error)
 	GetByID(ctx context.Context, id uint64) (model.Article, error)
 	GetArticlesByCategoryID(ctx context.Context, categoryID uint64, paging *shared.Page) ([]model.Article, error)
 }
@@ -27,6 +35,11 @@ func NewArticleDAO(db *gorm.DB) ArticleDAO {
 
 type articleGORM struct {
 	db *gorm.DB
+}
+
+func (a *articleGORM) UpdateToPublish(ctx context.Context, id uint64) (uint64, error) {
+	err := a.db.WithContext(ctx).Model(&model.Article{ID: id}).Update("state=?", pendingArticleState).Error
+	return id, err
 }
 
 func (a *articleGORM) Insert(ctx context.Context, article model.Article) (uint64, error) {
