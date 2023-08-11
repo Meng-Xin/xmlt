@@ -48,6 +48,7 @@ func SendMail(mailTo []string, subject string, body string) error {
 	return err
 }
 
+// ParseString 用来解析HTML
 func ParseString(path string) string {
 	byte, err := os.ReadFile(path)
 	if err != nil {
